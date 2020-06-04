@@ -1,0 +1,187 @@
+#include "State.h"
+
+int_t min_power() {
+	return (-1LL) * ((int_t)Functions::COUNT - 2LL);
+}
+
+model_stack init_model_stack() {
+	model_stack models;
+	models.push(model_t{
+		DEFAULT_ZOOM * INIT_MODEL.left,
+		DEFAULT_ZOOM * INIT_MODEL.right,
+		DEFAULT_ZOOM * INIT_MODEL.top,
+		DEFAULT_ZOOM * INIT_MODEL.bottom
+	});
+	models.push(INIT_MODEL);
+	return models;
+}
+
+model_stack push(model_stack models, model_t model) {
+	models.push(model);
+	return models;
+}
+
+model_stack pop(model_stack models) {
+	models.pop();
+	return models;
+}
+
+State::State() :
+	view(INIT_VIEW),
+	models(::init_model_stack()),
+	type(MANDELBROT),
+	j_coords(INIT_PAIR),
+	power(DEFAULT_POWER),
+	magnification(DEFAULT_MAGNIFICATION),
+	max_iterations(DEFAULT_MAX_ITERATIONS),
+	color_scheme_index(0),
+	algorithm_index(0)
+{}
+
+State::State(
+	view_t someView,
+	const model_stack& someStack,
+	int_t someType,
+	pair_t someJCoords,
+	int_t somePower,
+	int_t someMagnification,
+	int_t someMaxIterations,
+	int_t someColorSchemeIndex,
+	int_t someAlgorithmIndex
+) :
+	view(someView),
+	models(someStack),
+	type(someType),
+	j_coords(someJCoords),
+	power(somePower),
+	magnification(someMagnification),
+	max_iterations(someMaxIterations),
+	color_scheme_index(someColorSchemeIndex),
+	algorithm_index(someAlgorithmIndex)
+{}
+
+State& State::new_view(view_t value) {
+	view = value;
+	return *this;
+}
+
+State& State::init_view() {
+	return new_view(INIT_VIEW);
+}
+
+State& State::new_model_stack(const model_stack& value) {
+	models = value;
+	return *this;
+}
+
+State& State::init_model_stack() {
+	return new_model_stack(::init_model_stack());
+}
+
+State& State::push_model(model_t value) {
+	return new_model_stack(push(models, value));
+}
+
+State& State::pop_model() {
+	return new_model_stack(pop(models));
+}
+
+State& State::new_type(int_t value) {
+	type = value;
+	return *this;
+}
+
+State& State::new_j_coords(pair_t value) {
+	j_coords = value;
+	return *this;
+}
+
+State& State::new_power(int_t value) {
+	auto min = min_power();
+	power = value < min ? min : value;
+	return *this;
+}
+
+State& State::init_power() {
+	return new_power(DEFAULT_POWER);
+}
+
+State& State::next_power() {
+	return new_power(power + 1);
+}
+
+State& State::prev_power() {
+	return new_power(power - 1);
+}
+
+State& State::init_magnification() {
+	magnification = 0;
+	return *this;
+}
+
+State& State::next_magnification() {
+	magnification = magnification + 1;
+	return *this;
+}
+
+State& State::prev_magnification() {
+	magnification =
+		magnification == -1
+		? magnification
+		: magnification - 1;
+
+	return *this;
+}
+
+State& State::new_max_iterations(int_t value) {
+	max_iterations = value;
+	return *this;
+}
+
+State& State::init_max_iterations() {
+	return new_max_iterations(DEFAULT_MAX_ITERATIONS);
+}
+
+State& State::new_algorithm(int_t value) {
+	algorithm_index = value;
+	return *this;
+}
+
+State& State::next_algorithm() {
+	algorithm_index =
+		algorithm_index == (int_t)Algorithms::COUNT - 1
+		? 0 : algorithm_index + 1;
+
+	return *this;
+}
+
+State& State::prev_algorithm() {
+	algorithm_index =
+		algorithm_index == 0
+		? (int_t)Algorithms::COUNT - 1
+		: algorithm_index - 1;
+
+	return *this;
+}
+
+State& State::new_color_scheme(int_t value) {
+	color_scheme_index = value;
+	return *this;
+}
+
+State& State::next_color_scheme() {
+	color_scheme_index =
+		color_scheme_index == (int_t)ColorSchemes::COUNT - 1
+		? 0 : color_scheme_index + 1;
+
+	return *this;
+}
+
+State& State::prev_color_scheme() {
+	color_scheme_index =
+		color_scheme_index == 0
+		? (int_t)ColorSchemes::COUNT - 1
+		: color_scheme_index - 1;
+
+	return *this;
+}
