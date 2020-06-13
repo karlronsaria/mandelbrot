@@ -66,10 +66,6 @@ public:
 	Overlay& notification(const std::string& message);
 	Overlay& rendering(bool isRendering);
 	Overlay& state(const State& other);
-
-	static std::string GetFunctionName(int_t index);
-	static std::string GetAlgorithmName(int_t index);
-	static std::string GetColorSchemeName(int_t index);
 };
 
 std::string to_string(flt_t number, int_t precision);
@@ -87,15 +83,15 @@ public:
 	model_t get_boundaries(const Geometry2D& geo) const;
 
 	static int_t factor;
-	static int_t box_width;
-	static int_t box_height;
-	static int_t box_x_radius;
-	static int_t box_y_radius;
+	// static int_t box_width;
+	// static int_t box_height;
+	// static int_t box_x_radius;
+	// static int_t box_y_radius;
 };
 
 class InputBox : public MenuBox {
 protected:
-	static int DEFAULT_POINT;
+	static int default_point;
 public:
 	InputBox() = delete;
 	InputBox(const InputBox&) = delete;

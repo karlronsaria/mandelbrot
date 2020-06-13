@@ -15,78 +15,96 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Application.h">
+    <ClInclude Include="..\include\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\DebugWindow.h">
+    <ClInclude Include="..\include\DebugWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Entity.h">
+    <ClInclude Include="..\include\Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\font_t.h">
+    <ClInclude Include="..\include\font_t.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Geometry.h">
+    <ClInclude Include="..\include\Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\History.h">
+    <ClInclude Include="..\include\History.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Mandelbrot.h">
+    <ClInclude Include="..\include\Mandelbrot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\MenuBox.h">
+    <ClInclude Include="..\include\MenuBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Overlay.h">
+    <ClInclude Include="..\include\Overlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\verdanab_ttf.hpp">
+    <ClInclude Include="..\include\OverlayNotification.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\State.h">
+    <ClInclude Include="..\include\Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Threads.h">
+    <ClInclude Include="..\include\State.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Render.h">
+    <ClInclude Include="..\include\Threads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\verdanab_ttf.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Complex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TextEntry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Application.cpp">
+    <ClCompile Include="..\src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DebugWindow.cpp">
+    <ClCompile Include="..\src\DebugWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\font_t.cpp">
+    <ClCompile Include="..\src\font_t.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Geometry.cpp">
+    <ClCompile Include="..\src\Geometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="..\src\Mandelbrot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mandelbrot.cpp">
+    <ClCompile Include="..\src\MenuBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MenuBox.cpp">
+    <ClCompile Include="..\src\Overlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Overlay.cpp">
+    <ClCompile Include="..\src\OverlayNotification.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\State.cpp">
+    <ClCompile Include="..\src\Render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Threads.cpp">
+    <ClCompile Include="..\src\State.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render.cpp">
+    <ClCompile Include="..\src\Threads.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Complex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TextEntry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,14 +1,11 @@
 #pragma once
+#if __cplusplus == 201703L
+#include "types.h"
+#include <assert.h>
+#endif
 #include <memory>
 
-#define INT_TYPE   long long
-#define FLOAT_TYPE long double
-
-typedef INT_TYPE   int_t;
-typedef FLOAT_TYPE flt_t;
-
-class Scale
-{
+class Scale {
 private:
 	flt_t _coord_to_pixel;
 
@@ -32,8 +29,7 @@ public:
 	flt_t max_coord() const;
 };
 
-class YScale : public Scale
-{
+class YScale : public Scale {
 public:
 	YScale(int_t minPixel, int_t maxPixel, flt_t minCoord, flt_t maxCoord);
 	virtual ~YScale();
@@ -44,19 +40,34 @@ public:
 };
 
 template <typename T>
-struct Boundaries
-{
+struct Boundaries {
 	T left;
 	T right;
 	T top;
 	T bottom;
 };
 
+template <typename T>
+const Boundaries<T>& AssertNewBounds(T left, T right, T top, T bottom) {
+	bool noZeroLengths = left != right && top != bottom;
+
+#ifdef DEBUG
+	if (!noZeroLengths) {
+		pass("Bounds left", left);
+		pass("Bounds right", right);
+		pass("Bounds top", top);
+		pass("Bounds bottom", bottom);
+	}
+#endif
+
+	assert(noZeroLengths);
+	return Boundaries<T> { left, right, top, bottom };
+}
+
 typedef Boundaries<int_t> view_t;
 typedef Boundaries<flt_t> model_t;
 
-class Geometry2D
-{
+class Geometry2D {
 private:
 	Scale _horz;
 	Scale _vert;
@@ -90,8 +101,7 @@ public:
 
 typedef std::shared_ptr<Geometry2D> geo_ptr;
 
-class Plot2D
-{
+class Plot2D {
 private:
 	geo_ptr _geography;
 protected:
@@ -105,8 +115,7 @@ public:
 	const Geometry2D& geography() const;
 };
 
-class Map2D : public Plot2D
-{
+class Map2D : public Plot2D {
 public:
 	virtual ~Map2D();
 	virtual bool contains(int_t, int_t) const = 0;
@@ -115,29 +124,26 @@ public:
 typedef flt_t(*unary_t)(flt_t);
 typedef flt_t(*binary_t)(flt_t, flt_t);
 
-class Functional2D : public Map2D
-{
+class Functional2D : public Map2D {
 private:
 	unary_t _map;
-	flt_t _epsilon;
+	flt_t _delta;
 public:
-	Functional2D(geo_ptr& geo, unary_t map, flt_t epsilon);
+	Functional2D(geo_ptr& geo, unary_t map, flt_t delta);
 	virtual bool contains(int_t x, int_t y) const override;
 };
 
-class Parametric2D : public Map2D
-{
+class Parametric2D : public Map2D {
 private:
 	unary_t _x_inverse;
 	unary_t _y_inverse;
-	flt_t _epsilon;
+	flt_t _delta;
 public:
-	Parametric2D(geo_ptr& geo, unary_t xInverse, unary_t yInverse, flt_t epsilon);
+	Parametric2D(geo_ptr& geo, unary_t xInverse, unary_t yInverse, flt_t delta);
 	virtual bool contains(int_t x, int_t y) const override;
 };
 
-class Surface2D : public Map2D
-{
+class Surface2D : public Map2D {
 private:
 	binary_t _height;
 	bool (*_contains)(flt_t, flt_t);

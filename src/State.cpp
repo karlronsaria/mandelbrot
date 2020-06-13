@@ -1,11 +1,13 @@
 #include "State.h"
 
+view_t State::_init_view = { 0LL, 1LL, 0LL, 1LL };
+
 int_t min_power() {
-	return (-1LL) * ((int_t)Functions::COUNT - 2LL);
+	return 2LL - TO_INT(mnd::Functions::COUNT);
 }
 
-model_stack init_model_stack() {
-	model_stack models;
+model_stack_t init_model_stack() {
+	model_stack_t models;
 	models.push(model_t{
 		DEFAULT_ZOOM * INIT_MODEL.left,
 		DEFAULT_ZOOM * INIT_MODEL.right,
@@ -16,18 +18,18 @@ model_stack init_model_stack() {
 	return models;
 }
 
-model_stack push(model_stack models, model_t model) {
+model_stack_t push(model_stack_t models, model_t model) {
 	models.push(model);
 	return models;
 }
 
-model_stack pop(model_stack models) {
+model_stack_t pop(model_stack_t models) {
 	models.pop();
 	return models;
 }
 
 State::State() :
-	view(INIT_VIEW),
+	view(State::_init_view),
 	models(::init_model_stack()),
 	type(MANDELBROT),
 	j_coords(INIT_PAIR),
@@ -38,9 +40,23 @@ State::State() :
 	algorithm_index(0)
 {}
 
+State::State(int_t width_pixels, int_t height_pixels) :
+	view(view_t{ 0LL, width_pixels, 0LL, height_pixels }),
+	models(::init_model_stack()),
+	type(MANDELBROT),
+	j_coords(INIT_PAIR),
+	power(DEFAULT_POWER),
+	magnification(DEFAULT_MAGNIFICATION),
+	max_iterations(DEFAULT_MAX_ITERATIONS),
+	color_scheme_index(0),
+	algorithm_index(0)
+{
+	_init_view = view;
+}
+
 State::State(
 	view_t someView,
-	const model_stack& someStack,
+	const model_stack_t& someStack,
 	int_t someType,
 	pair_t someJCoords,
 	int_t somePower,
@@ -66,10 +82,10 @@ State& State::new_view(view_t value) {
 }
 
 State& State::init_view() {
-	return new_view(INIT_VIEW);
+	return new_view(State::_init_view);
 }
 
-State& State::new_model_stack(const model_stack& value) {
+State& State::new_model_stack(const model_stack_t& value) {
 	models = value;
 	return *this;
 }
@@ -149,7 +165,7 @@ State& State::new_algorithm(int_t value) {
 
 State& State::next_algorithm() {
 	algorithm_index =
-		algorithm_index == (int_t)Algorithms::COUNT - 1
+		algorithm_index == TO_INT(mnd::Algorithms::COUNT) - 1
 		? 0 : algorithm_index + 1;
 
 	return *this;
@@ -158,7 +174,7 @@ State& State::next_algorithm() {
 State& State::prev_algorithm() {
 	algorithm_index =
 		algorithm_index == 0
-		? (int_t)Algorithms::COUNT - 1
+		? TO_INT(mnd::Algorithms::COUNT) - 1
 		: algorithm_index - 1;
 
 	return *this;
@@ -171,7 +187,7 @@ State& State::new_color_scheme(int_t value) {
 
 State& State::next_color_scheme() {
 	color_scheme_index =
-		color_scheme_index == (int_t)ColorSchemes::COUNT - 1
+		color_scheme_index == TO_INT(mnd::ColorSchemes::COUNT) - 1
 		? 0 : color_scheme_index + 1;
 
 	return *this;
@@ -180,7 +196,7 @@ State& State::next_color_scheme() {
 State& State::prev_color_scheme() {
 	color_scheme_index =
 		color_scheme_index == 0
-		? (int_t)ColorSchemes::COUNT - 1
+		? TO_INT(mnd::ColorSchemes::COUNT) - 1
 		: color_scheme_index - 1;
 
 	return *this;

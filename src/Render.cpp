@@ -3,53 +3,6 @@
 volatile std::atomic<bool> Renderer::Threads::rendering = false;
 volatile std::atomic<bool> Renderer::Threads::paused = false;
 
-std::vector<complex_f> Renderer::_complex_functions = Renderer::GetFunctions();
-std::vector<algorithm_f> Renderer::_algorithms = Renderer::GetAlgorithms();
-std::vector<color_code_f> Renderer::_color_schemes = Renderer::GetColorSchemes();
-
-complex_f Renderer::FunctionByIndex(int_t index) {
-	return _complex_functions[index];
-}
-
-color_code_f Renderer::ColorSchemeByIndex(int_t index) {
-	return _color_schemes[index];
-}
-
-algorithm_f Renderer::AlgorithmByIndex(int_t index) {
-	return _algorithms[index];
-}
-
-complex_f Renderer::FunctionByOrder(int_t order) {
-	if (order > 0)
-		return _complex_functions[(int_t)Functions::UNIT_POWER];
-
-	return _complex_functions[(-1) * (order + (int_t)Functions::OPAL_VEIN)];
-}
-
-std::vector<complex_f> Renderer::GetFunctions() {
-	std::vector<complex_f> list;
-	list.push_back(complex_unit_power); // 0
-	list.push_back(complex_opal_vein);  // 1
-//  list.push_back(other);              // 2
-	return list;
-}
-
-std::vector<algorithm_f> Renderer::GetAlgorithms() {
-	std::vector<algorithm_f> list;
-	list.push_back(EscapeTime);
-	list.push_back(Potential);
-	return list;
-}
-
-std::vector<color_code_f> Renderer::GetColorSchemes() {
-	std::vector<color_code_f> list;
-	list.push_back(GetColorLinear);
-	list.push_back(GetColorHyperbolic);
-	list.push_back(GetColorLogarithmic);
-	list.push_back(GetColorCircular);
-	return list;
-}
-
 Renderer::Renderer(
 	std::reference_wrapper<sf::Image> image,
 	std::reference_wrapper<Overlay> display,
@@ -65,13 +18,12 @@ Renderer::Renderer(
 	_power(s.power),
 	_j_coords(s.j_coords),
 	_plot(new pair_t[s.view.bottom * s.view.right]),
-	_fnc(FunctionByOrder(s.power)),
-	_col(_color_schemes[s.color_scheme_index]),
-	_alg(_algorithms[s.algorithm_index])
+	_fnc(mnd::FunctionByOrder(s.power)),
+	_col(mnd::ColorSchemeByIndex(s.color_scheme_index)),
+	_alg(mnd::AlgorithmByIndex(s.algorithm_index))
 {}
 
-void Renderer::Start()
-{
+void Renderer::Start() {
 	Renderer::Threads::rendering = true;
 
 	switch (_type) {
@@ -131,8 +83,7 @@ bool Renderer::ColorJuliaPixel(sf::Image& someImage, int_t x, int_t y) {
 	return ColorPixel(someImage, x, y, _j_coords);
 }
 
-int Renderer::RenderFrame(sf::Image& someImage)
-{
+int Renderer::RenderFrame(sf::Image& someImage) {
 	std::vector<std::thread> threads;
 	volatile std::atomic<int> rendered = 0;
 
@@ -154,12 +105,12 @@ int Renderer::RenderFrame(sf::Image& someImage)
 	return rendered;
 }
 
-void Renderer::Interruptible::InitializePlot(pair_t*& plot, const view_t& view) {
+void Renderer::Interruptible::InitializePlot(plot_t& plot, const view_t& view) {
 	for (int_t i = 0; Renderer::Threads::rendering && i < view.bottom * view.right; ++i)
 		plot[i] = INIT_PAIR;
 }
 
-void Renderer::Interruptible::InitializeJulia(pair_t*& plot, const view_t& view, const Geometry2D& scales) {
+void Renderer::Interruptible::InitializeJulia(plot_t& plot, const view_t& view, const Geometry2D& scales) {
 	int_t x, y;
 
 	for (y = view.top; Renderer::Threads::rendering && y < view.bottom; ++y)

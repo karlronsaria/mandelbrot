@@ -98,10 +98,6 @@ void History<T>::add(const T& payload) {
 	drop_tail();
 	_list.push_back(payload);
 	next();
-
-// #ifdef DEBUG
-// 	pass("History size", size());
-// #endif
 }
 
 template <typename T>

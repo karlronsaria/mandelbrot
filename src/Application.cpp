@@ -1,25 +1,25 @@
 #include "Application.h"
 
-const int_t Application::MSG_DURATION_SEC = 3;
-const int_t Application::POLLING_DELAY_MSEC = 250;
+const int_t Application::MSG_DURATION_SEC = 3LL;
+const int_t Application::POLLING_DELAY_MSEC = 250LL;
 const char* Application::DEFAULT_EXTENSION = ".png";
 
 volatile std::atomic<bool> Application::delay_next_poll;
 volatile std::atomic<bool> Application::notifying;
 
 union convert_t {
-	flt_t f;
-	unsigned char s[FLT_T_SIZE];
+	flt_t flt;
+	unsigned char c_str[FLT_T_SIZE];
 };
 
 std::string to_hex_str(flt_t value) {
 	convert_t x;
-	x.f = value;
+	x.flt = value;
 	std::stringstream buf;
 	buf.fill('0');
 
 	for (int i = 0; i < FLT_T_SIZE; ++i)
-		buf << std::setw(COUPLET_SIZE) << std::hex << (int)x.s[i];
+		buf << std::setw(COUPLET_SIZE) << std::hex << (int)x.c_str[i];
 
 	return buf.str();
 }
@@ -39,11 +39,11 @@ flt_t to_float(const std::string& word) {
 			i = i + 1;
 		}
 
-		u.s[k] = std::stoi(couplet, nullptr, 16);
+		u.c_str[k] = std::stoi(couplet, nullptr, 16);
 		k = k + 1;
 	}
 
-	return u.f;
+	return u.flt;
 }
 
 std::string GetDateTimeString() {
@@ -75,14 +75,13 @@ std::string GetDateTimeString() {
 	return str;
 }
 
-Application::Application(font_t& font) :
+Application::Application(font_t& font, int_t width_pixels, int_t height_pixels, const std::string& title) :
 	_font(font),
 	_scales(std::make_shared<Geometry2D>()),
-	_states(State()),
+	_window(sf::VideoMode(width_pixels, height_pixels, BITS_PER_PIXEL), title),
+	_states(State(width_pixels, height_pixels)),
 	_main_overlay(font, _scales),
-	_window(sf::VideoMode(WIDTH_PIXELS, HEIGHT_PIXELS, 32), "Test"),
 	_magnifier(_window),
-	event(),
 	_show_overlay(true)
 {
 	RebuildGeometry();
@@ -95,44 +94,62 @@ Application::~Application() {
 	Threads::Join();
 }
 
-const State& Application::state() const {
-	return _current_state;
+const canvas_t& Application::canvas() const {
+	return _window;
 }
 
-State& Application::state() {
-	return _current_state;
+pair_t Application::GetCenter() const {
+	auto left = current_state.models.top().left;
+	auto top = current_state.models.top().top;
+	return pair_t{
+		left + abs(left - current_state.models.top().right) / 2,
+		top + abs(top - current_state.models.top().bottom) / 2
+	};
 }
 
-const Overlay& Application::main_overlay() const {
-	return _main_overlay;
-}
+// Format:
+// 
+//    yyyy_MM_dd_HHmmss_-_power_magnification_iteration_x_y
+//    
+std::string Application::NewFileName(std::string extension) const {
+	int_t iteration = _main_overlay.iteration();
+	int_t power = current_state.power;
+	int_t magnification = current_state.magnification;
+	auto center = GetCenter();
+	std::ostringstream buf;
 
-Overlay& Application::main_overlay() {
-	return _main_overlay;
+	buf << std::hex << power << "_"
+		<< std::hex << magnification << "_"
+		<< std::hex << iteration << "_"
+		<< to_hex_str(center.re())
+		<< "_"
+		<< to_hex_str(center.im());
+
+	return GetDateTimeString() + "_-_" + buf.str() + extension;
 }
 
 void Application::Mandelbrot() {
-	state()
+	current_state
 		.new_type(MANDELBROT);
 }
 
 void Application::Julia(pair_t coordinates) {
-	state()
+	current_state
 		.new_type(JULIA)
 		.new_j_coords(coordinates);
 }
 
 void Application::PushHistory() {
-	_states.add(state());
+	_states.add(current_state);
 }
 
 void Application::PushOverlay() {
-	main_overlay().state(state());
+	_main_overlay.state(current_state);
 }
 
 bool Application::GoToPreviousState() {
 	if (_states.prev()) {
-		state() = _states.current();
+		current_state = _states.current();
 		return true;
 	}
 	
@@ -141,7 +158,7 @@ bool Application::GoToPreviousState() {
 
 bool Application::GoToNextState() {
 	if (_states.next()) {
-		state() = _states.current();
+		current_state = _states.current();
 		return true;
 	}
 
@@ -149,52 +166,15 @@ bool Application::GoToNextState() {
 }
 
 void Application::RebuildGeometry() {
-	*_scales = Geometry2D(state().view, state().models.top());
+	*_scales = Geometry2D(current_state.view, current_state.models.top());
 }
 
-bool Application::PollNext() {
-	return !Application::delay_next_poll && _window.pollEvent(event);
-}
-
-flt_t Application::GetPixelMinimum(flt_t rate) const {
-	auto view = state().view;
-	return rate * (flt_t)(view.right - view.left) * (view.bottom - view.top);
-}
-
-void Application::GetCenter(flt_t& x, flt_t& y) const {
-	auto left = state().models.top().left;
-	auto top = state().models.top().top;
-	x = state().models.top().left + abs(left - state().models.top().right) / 2;
-	y = state().models.top().top + abs(top - state().models.top().bottom) / 2;
-}
-
-// Format:
-// 
-//    yyyy_MM_dd_HHmmss_-_power_magnification_iteration_x_y
-//    
-std::string Application::NewFileName(std::string extension) const {
-	int_t iteration = main_overlay().iteration();
-	int_t power = state().power;
-	int_t magnification = state().magnification;
-
-	flt_t x, y;
-
-	GetCenter(x, y);
-
-	std::ostringstream buf;
-
-	buf << std::hex << power << "_"
-		<< std::hex << magnification << "_"
-		<< std::hex << iteration << "_"
-		<< to_hex_str(x)
-		<< "_"
-		<< to_hex_str(y);
-
-	return GetDateTimeString() + "_-_" + buf.str() + extension;
+bool Application::PollNext(sf::Event& e) {
+	return !Application::delay_next_poll && _window.pollEvent(e);
 }
 
 void Application::Magnify() {
-	state()
+	current_state
 		.push_model(_magnifier.get_boundaries(*_scales))
 		.next_magnification();
 
@@ -202,7 +182,7 @@ void Application::Magnify() {
 }
 
 void Application::Demagnify() {
-	state()
+	current_state
 		.pop_model()
 		.prev_magnification();
 
@@ -212,7 +192,7 @@ void Application::Demagnify() {
 void Application::Update() {
 	_texture.loadFromImage(_image);
 	_sprite.setTexture(_texture);
-	main_overlay().update(_window);
+	_main_overlay.update(_window);
 	_magnifier.update(_window);
 }
 
@@ -224,7 +204,7 @@ void Application::Draw() {
 	_window.draw(_sprite);
 
 	if (_show_overlay) {
-		main_overlay().draw_to(_window);
+		_main_overlay.draw_to(_window);
 		_magnifier.draw_to(_window);
 	}
 }
@@ -236,10 +216,9 @@ void Application::Show() {
 bool Application::Save() {
 	auto temp = Renderer::Threads::paused;
 	Renderer::Threads::paused = true;
-
 	sf::RenderTexture myTexture;
 
-	if (!myTexture.create(state().view.right, state().view.bottom)) {
+	if (!myTexture.create(current_state.view.right, current_state.view.bottom)) {
 		Renderer::Threads::paused = temp;
 		return false;
 	}
@@ -248,7 +227,7 @@ bool Application::Save() {
 	myTexture.draw(_sprite);
 
 	if (_show_overlay)
-		main_overlay().draw_to(myTexture);
+		_main_overlay.draw_to(myTexture);
 
 	myTexture
 		.getTexture()
@@ -287,86 +266,31 @@ void Application::GoTo(const std::string& str) {
 	getline(buf, temp, '.');
 	flt_t y_coord = to_float(temp);
 
-	state()
+	current_state
 		.new_power(power)
 		.init_magnification()
 		.init_max_iterations();
 
 	RebuildGeometry();
 
-	int_t x_pixel;
-	int_t y_pixel;
-
-	while (magnification < state().magnification) {
-		x_pixel = _scales->horz().to_pixel(x_coord);
-		y_pixel = _scales->vert().to_pixel(y_coord);
-		_magnifier.move(x_pixel, y_pixel);
+	while (magnification < current_state.magnification) {
+		_magnifier.move(
+			_scales->horz().to_pixel(x_coord),
+			_scales->vert().to_pixel(y_coord)
+		);
 		Demagnify();
 	}
 
-	while (magnification > state().magnification) {
-		x_pixel = _scales->horz().to_pixel(x_coord);
-		y_pixel = _scales->vert().to_pixel(y_coord);
-		_magnifier.move(x_pixel, y_pixel);
+	while (magnification > current_state.magnification) {
+		_magnifier.move(
+			_scales->horz().to_pixel(x_coord),
+			_scales->vert().to_pixel(y_coord)
+		);
 		Magnify();
 	}
 }
 
-bool IsValidCharacter(char temp) {
-	return isdigit(temp);
-}
-
-void Insert(TextEntry& info, char payload) {
-	if (info.str.length() < info.max_length) {
-		if (info.pos == info.str.length())
-			info.str.append(1, payload);
-		else
-			info.str.insert(info.pos, 1, payload);
-
-		info.pos = info.pos + 1;
-	}
-}
-
-void Backspace(TextEntry& info) {
-	if (info.str.length() > 0)
-		if (info.pos > 0)
-			info.str.erase(--info.pos, 1);
-}
-
-void Delete(TextEntry& info) {
-	if (info.str.length() > 0) {
-		if (info.pos >= 0)
-			info.str.erase(info.pos, 1);
-
-		if (info.pos > info.str.length())
-			info.pos = info.pos - 1;
-	}
-}
-
-void PositionStart(TextEntry& info) {
-	info.pos = 0;
-}
-
-void PositionEnd(TextEntry& info) {
-	info.pos = info.str.length() > 0 ? info.str.length() : 0;
-}
-
-void PositionForward(TextEntry& info) {
-	if (info.str.length() > 0 && info.pos < info.str.length())
-		info.pos = info.pos + 1;
-}
-
-void PositionBack(TextEntry& info) {
-	if (info.pos > 0)
-		info.pos = info.pos - 1;
-}
-
-int_t ToInteger(TextEntry& info) {
-	return info.str.length() > 0 ? std::stoll(info.str) : 0;
-}
-
-bool Application::EnterNewMaximum(int_t& max)
-{
+bool Application::EnterNewMaximum(int_t& max) {
 	bool maximumChanged = false;
 	bool acceptingInput = true;
 	bool prevState = Renderer::Threads::paused;
@@ -379,12 +303,13 @@ bool Application::EnterNewMaximum(int_t& max)
 	TextEntry info;
 	int_t currentMax;
 	char temp;
+	sf::Event event;
 
-	while (_window.isOpen() && acceptingInput) {
-		while (PollNext()) {
+	while (IsOpen() && acceptingInput) {
+		while (PollNext(event)) {
 			switch (event.type) {
 			case sf::Event::Closed:
-				_window.close();
+				Close();
 				acceptingInput = false;
 				break;
 			case sf::Event::KeyPressed:
@@ -395,20 +320,20 @@ bool Application::EnterNewMaximum(int_t& max)
 				case sf::Keyboard::Key::D:
 					info.str = std::to_string(DEFAULT_MAX_ITERATIONS);
 					inputOverlay.set(promptMsg + info.str + helpMsg);
-					PositionEnd(info);
+					info.PositionEnd();
 					break;
 				case sf::Keyboard::Key::Up:
-					currentMax = ToInteger(info);
+					currentMax = info.ToInteger();
 
-					if (currentMax < (int_t)pow(10, info.max_length + 1)) {
-						currentMax = ToInteger(info);
+					if (currentMax < TO_INT(pow(10, info.max_length + 1))) {
+						currentMax = info.ToInteger();
 						info.str = std::to_string(currentMax + 1);
 						inputOverlay.set(promptMsg + info.str + helpMsg);
 					}
 
 					break;
 				case sf::Keyboard::Key::Down:
-					currentMax = ToInteger(info);
+					currentMax = info.ToInteger();
 
 					if (currentMax > 0) {
 						info.str = std::to_string(currentMax - 1);
@@ -417,19 +342,19 @@ bool Application::EnterNewMaximum(int_t& max)
 
 					break;
 				case sf::Keyboard::Key::Left:
-					PositionBack(info);
+					info.PositionBack();
 					break;
 				case sf::Keyboard::Key::Right:
-					PositionForward(info);
+					info.PositionForward();
 					break;
 				case sf::Keyboard::Key::Home:
-					PositionStart(info);
+					info.PositionStart();
 					break;
 				case sf::Keyboard::Key::End:
-					PositionEnd(info);
+					info.PositionEnd();
 					break;
 				case sf::Keyboard::Key::Delete:
-					Delete(info);
+					info.Delete();
 					inputOverlay.set(promptMsg + info.str + helpMsg);
 					break;
 				case sf::Keyboard::Key::Enter:
@@ -443,9 +368,9 @@ bool Application::EnterNewMaximum(int_t& max)
 				temp = (char)event.text.unicode;
 
 				if (temp == '\b')
-					Backspace(info);
-				else if (IsValidCharacter(temp))
-					Insert(info, temp);
+					info.Backspace();
+				else if (isdigit(temp))
+					info.Insert(temp);
 
 				inputOverlay.set(promptMsg + info.str + helpMsg);
 				break;
@@ -466,8 +391,7 @@ bool Application::EnterNewMaximum(int_t& max)
 	return maximumChanged;
 }
 
-bool Application::PollCoordinates(pair_t& coords)
-{
+bool Application::EnterNewCoordinates(pair_t& coords) {
 	bool acceptingInput = true;
 	bool actionConfirmed = false;
 	bool prevState = Renderer::Threads::paused;
@@ -477,14 +401,13 @@ bool Application::PollCoordinates(pair_t& coords)
 	inputOverlay.set("Click on a point\n[Esc] to cancel");
 
 	TextEntry info;
-	int_t currentMax;
-	char temp;
+	sf::Event event;
 
-	while (_window.isOpen() && acceptingInput) {
-		while (PollNext()) {
+	while (IsOpen() && acceptingInput) {
+		while (PollNext(event)) {
 			switch (event.type) {
 			case sf::Event::Closed:
-				_window.close();
+				Close();
 				break;
 			case sf::Event::KeyPressed:
 				switch (event.key.code) {
@@ -498,8 +421,10 @@ bool Application::PollCoordinates(pair_t& coords)
 				switch (event.mouseButton.button) {
 				case sf::Mouse::Left:
 					if (MouseInView(_window)) {
-						coords.first = _scales->coord_x((int_t)sf::Mouse::getPosition(_window).x);
-						coords.secnd = _scales->coord_y((int_t)sf::Mouse::getPosition(_window).y);
+						coords = pair_t(
+							_scales->coord_x(TO_INT(sf::Mouse::getPosition(_window).x)),
+							_scales->coord_y(TO_INT(sf::Mouse::getPosition(_window).y))
+						);
 						acceptingInput = false;
 						actionConfirmed = true;
 					}
@@ -522,15 +447,15 @@ bool Application::PollCoordinates(pair_t& coords)
 	return actionConfirmed;
 }
 
-void Application::Render() {
-	Renderer r(std::ref(_image), std::ref(_main_overlay), state());
-	r.Start();
-}
-
 void Application::StartRenderAsync() {
-	_image.create(state().view.right, state().view.bottom, INIT_COLOR);
+	_image.create(current_state.view.right, current_state.view.bottom, INIT_COLOR);
 	Renderer::Threads::rendering = true;
-	_render_thread = std::thread(&Application::Render, this);
+	_render_thread = std::thread(
+		[i = std::ref(_image), o = std::ref(_main_overlay), s = current_state]() {
+			Renderer r(i, o, s);
+			r.Start();
+		}
+	);
 }
 
 void Application::StopRenderAsync() {
@@ -541,7 +466,7 @@ void Application::StopRenderAsync() {
 }
 
 void Application::StartTimedMessageAsync(const std::string& message, int_t seconds) {
-	main_overlay().notification(message);
+	_main_overlay.notification(message);
 
 	if (_clock_thread.joinable()) {
 		notifying = false;
@@ -552,13 +477,13 @@ void Application::StartTimedMessageAsync(const std::string& message, int_t secon
 		auto msg = message;
 		auto duration = seconds;
 		notifying = true;
-		main_overlay().notification(msg);
+		_main_overlay.notification(msg);
 
-		for (int i = duration; notifying && i > 0; --i)
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+		for (int_t i = duration; notifying && i > 0; --i)
+			std::this_thread::sleep_for(std::chrono::seconds(DELAY_INTERVAL_SEC));
 
 		if (notifying)
-			main_overlay().notification("");
+			_main_overlay.notification("");
 	});
 }
 
@@ -567,4 +492,29 @@ void Application::StartPollDelayAsync() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(Application::POLLING_DELAY_MSEC));
 		Application::delay_next_poll = false;
 	}).detach();
+}
+
+bool Application::ToggleOverlay() {
+	_show_overlay = !_show_overlay;
+	return _show_overlay;
+}
+
+bool Application::TogglePauseRender() {
+	Renderer::Threads::paused = !Renderer::Threads::paused;
+
+	if (Renderer::Threads::paused) {
+		Application::notifying = false;
+		_main_overlay.notification("Paused.");
+	}
+	else {
+		StartTimedMessageAsync("Unpaused.");
+	}
+}
+
+bool Application::IsOpen() const {
+	return _window.isOpen();
+}
+
+void Application::Close() {
+	_window.close();
 }

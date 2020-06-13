@@ -2,59 +2,35 @@
 #include "Mandelbrot.h"
 #include <stack>
 
-const int_t WIDTH_PIXELS = 1200;
-const int_t HEIGHT_PIXELS = 900;
-const view_t INIT_VIEW{ 0, WIDTH_PIXELS, 0, HEIGHT_PIXELS };
-const model_t INIT_MODEL{ -2.5, 1.5, -1.5, 1.5 };
-const int_t DEFAULT_POWER = 2;
-const int_t DEFAULT_MAGNIFICATION = 0;
+const model_t INIT_MODEL = AssertNewBounds<flt_t>(-2.5L, 1.5L, -1.5L, 1.5L);
+const int_t DEFAULT_POWER = 2LL;
+const int_t DEFAULT_MAGNIFICATION = 0LL;
 
 #ifdef DEBUG
-const int_t DEFAULT_MAX_ITERATIONS = 3;
+const int_t DEFAULT_MAX_ITERATIONS = 3LL;
 #else
-const int_t DEFAULT_MAX_ITERATIONS = 100;
+const int_t DEFAULT_MAX_ITERATIONS = 100LL;
 #endif
 
-const int_t DEFAULT_ZOOM = 5;
-const pair_t INIT_PAIR = { 0.F, 0.F };
+const int_t DEFAULT_ZOOM = 5LL;
+const pair_t INIT_PAIR = { 0.L, 0.L };
 
-const int_t MANDELBROT = 0;
-const int_t JULIA = 1;
+const int_t DEFAULT_ALGORITHM_INDEX = 0LL;
+const int_t DEFAULT_COLOR_SCHEME_INDEX = 0LL;
 
-const int_t DEFAULT_ALGORITHM_INDEX = 0;
-const int_t DEFAULT_COLOR_SCHEME_INDEX = 0;
-
-typedef std::stack<model_t> model_stack;
-
-enum class Functions {
-	OPAL_VEIN = -1,
-	UNIT_POWER = 0,
-	COUNT = 2
-};
-
-enum class Algorithms {
-	ESCAPE_TIME,
-	POTENTIAL,
-	COUNT
-};
-
-enum class ColorSchemes {
-	LINEAR,
-	HYPERBOLIC,
-	LOGARITHMIC,
-	CIRCULAR,
-	COUNT
-};
+typedef std::stack<model_t> model_stack_t;
 
 int_t min_power();
-model_stack init_model_stack();
-model_stack push(model_stack models, model_t model);
-model_stack pop(model_stack models);
+model_stack_t init_model_stack();
+model_stack_t push(model_stack_t models, model_t model);
+model_stack_t pop(model_stack_t models);
 
-struct State
-{
+struct State {
+public:
+	static view_t _init_view;
+
 	view_t view;
-	model_stack models;
+	model_stack_t models;
 	int_t type;
 	pair_t j_coords;
 	int_t power;
@@ -64,7 +40,8 @@ struct State
 	int_t algorithm_index;
 
 	State();
-	State(view_t, const model_stack&, int_t, pair_t, int_t, int_t, int_t, int_t, int_t);
+	State(int_t width_pixels, int_t height_pixels);
+	State(view_t, const model_stack_t&, int_t, pair_t, int_t, int_t, int_t, int_t, int_t);
 	State(const State&) = default;
 	virtual ~State() = default;
 	State& operator=(const State&) = default;
@@ -72,7 +49,7 @@ struct State
 	State& new_view(view_t value);
 	State& init_view();
 
-	State& new_model_stack(const model_stack& value);
+	State& new_model_stack(const model_stack_t& value);
 	State& init_model_stack();
 	State& push_model(model_t value);
 	State& pop_model();

@@ -1,40 +1,72 @@
+#include "os.h"
 #include "Application.h"
 #include "verdanab_ttf.hpp"
 
-int main(int argc, char** argv) {
-	font_t myFont(&__verdanab_ttf, __verdanab_ttf_len);
-	Application app(myFont);
-	bool change_history;
-	bool change_overlay;
+const int_t WIDTH_PIXELS = 1200;
+const int_t HEIGHT_PIXELS = 900;
 
-	if (argc > 1)
-		app.GoTo(argv[1]);
+#if defined(WINDOWS) && !defined(_CONSOLE)
+#include <Windows.h>
+
+int wWinMain(HINSTANCE h, HINSTANCE prev_h, PWSTR argv, int n_cmd_show)
+{
+	std::vector<std::string> args;
+
+	{
+		int argc;
+		auto lpwstr = CommandLineToArgvW(GetCommandLine(), &argc);
+		for (int i = 0; i < argc; ++i) {
+			auto wstr = std::wstring(lpwstr[i]);
+			args.push_back(std::string(wstr.begin(), wstr.end()));
+		}
+	}
+
+#else
+
+int main(int argc, char** argv)
+{
+	std::vector<std::string> args;
+
+	for (int i = 0; i < argc; ++i)
+		args.push_back(std::string(argv[i]));
+
+#endif
+	
+	font_t myFont(&__verdanab_ttf, __verdanab_ttf_len);
+	Application app(myFont, WIDTH_PIXELS, HEIGHT_PIXELS, args[0]);
+
+	if (args.size() > 1)
+		app.GoTo(args[1]);
 
 	app.StartRenderAsync();
 
-	while (app._window.isOpen()) {
+	bool change_history;
+	bool change_overlay;
+	sf::Event event;
+
+	while (app.IsOpen()) {
 		change_history = false;
 		change_overlay = false;
 
-		while (app.PollNext()) {
-			switch (app.event.type) {
+		while (app.PollNext(event)) {
+			switch (event.type) {
 			case sf::Event::Closed:
-				app._window.close();
+				app.Close();
 				break;
 			case sf::Event::KeyPressed:
-				if (app.event.key.code >= sf::Keyboard::Num0 && app.event.key.code <= sf::Keyboard::Num9) {
+				if (event.key.code >= sf::Keyboard::Num0 && event.key.code <= sf::Keyboard::Num9) {
 					app.StopRenderAsync();
-					app.state().new_power((int_t)app.event.key.code - (int_t)sf::Keyboard::Num0);
+					app.current_state.new_power(TO_INT(event.key.code) - TO_INT(sf::Keyboard::Num0));
 					app.StartRenderAsync();
 					change_history = true;
 					change_overlay = true;
 					Application::delay_next_poll = true;
 				}
 				else {
-					switch (app.event.key.code) {
+					switch (event.key.code) {
 					case sf::Keyboard::Key::Escape:
 						app.StopRenderAsync();
-						app.state().init_model_stack().init_magnification();
+						app.current_state.init_model_stack().init_magnification();
 						app.Mandelbrot();
 						app.StartRenderAsync();
 						change_history = true;
@@ -46,7 +78,7 @@ int main(int argc, char** argv) {
 							int_t newMaximum;
 
 							if (app.EnterNewMaximum(newMaximum)) {
-								app.state().new_max_iterations(newMaximum);
+								app.current_state.new_max_iterations(newMaximum);
 								app.StopRenderAsync();
 								app.StartRenderAsync();
 								change_history = true;
@@ -57,10 +89,9 @@ int main(int argc, char** argv) {
 						break;
 					case sf::Keyboard::Key::J:
 						{
-							auto temp = app.state().j_coords;
+							auto temp = app.current_state.j_coords;
 							
-							if (app.PollCoordinates(temp))
-							{
+							if (app.EnterNewCoordinates(temp)) {
 								app.StopRenderAsync();
 								app.Julia(temp);
 								app.StartRenderAsync();
@@ -71,16 +102,7 @@ int main(int argc, char** argv) {
 						
 						break;
 					case sf::Keyboard::Key::P:
-						Renderer::Threads::paused = !Renderer::Threads::paused;
-
-						if (Renderer::Threads::paused) {
-							Application::notifying = false;
-							app.main_overlay().notification("Paused.");
-						}
-						else {
-							app.StartTimedMessageAsync("Unpaused.");
-						}
-
+						app.TogglePauseRender();
 						break;
 					case sf::Keyboard::Key::R:
 						app.StopRenderAsync();
@@ -95,21 +117,21 @@ int main(int argc, char** argv) {
 
 						break;
 					case sf::Keyboard::Key::T:
-						app._show_overlay = !app._show_overlay;
+						app.ToggleOverlay();
 						Application::delay_next_poll = true;
 						break;
 					case sf::Keyboard::Key::PageUp:
 						app.StopRenderAsync();
-						app.state().next_power();
+						app.current_state.next_power();
 						app.StartRenderAsync();
 						change_history = true;
 						change_overlay = true;
 						Application::delay_next_poll = true;
 						break;
 					case sf::Keyboard::Key::PageDown:
-						if (app.state().power > min_power()) {
+						if (app.current_state.power > min_power()) {
 							app.StopRenderAsync();
-							app.state().prev_power();
+							app.current_state.prev_power();
 							app.StartRenderAsync();
 							change_history = true;
 							change_overlay = true;
@@ -119,7 +141,7 @@ int main(int argc, char** argv) {
 						break;
 					case sf::Keyboard::Key::Up:
 						app.StopRenderAsync();
-						app.state().prev_algorithm();
+						app.current_state.prev_algorithm();
 						app.StartRenderAsync();
 						change_history = true;
 						change_overlay = true;
@@ -127,7 +149,7 @@ int main(int argc, char** argv) {
 						break;
 					case sf::Keyboard::Key::Down:
 						app.StopRenderAsync();
-						app.state().next_algorithm();
+						app.current_state.next_algorithm();
 						app.StartRenderAsync();
 						change_history = true;
 						change_overlay = true;
@@ -138,12 +160,12 @@ int main(int argc, char** argv) {
 							if (app.GoToPreviousState()) {
 								app.StopRenderAsync();
 
-								switch (app.state().type) {
+								switch (app.current_state.type) {
 								case MANDELBROT:
 									app.Mandelbrot();
 									break;
 								case JULIA:
-									app.Julia(app.state().j_coords);
+									app.Julia(app.current_state.j_coords);
 									break;
 								}
 
@@ -154,7 +176,7 @@ int main(int argc, char** argv) {
 						}
 						else {
 							app.StopRenderAsync();
-							app.state().prev_color_scheme();
+							app.current_state.prev_color_scheme();
 							app.StartRenderAsync();
 							change_history = true;
 							change_overlay = true;
@@ -167,12 +189,12 @@ int main(int argc, char** argv) {
 							if (app.GoToNextState()) {
 								app.StopRenderAsync();
 
-								switch (app.state().type) {
+								switch (app.current_state.type) {
 								case MANDELBROT:
 									app.Mandelbrot();
 									break;
 								case JULIA:
-									app.Julia(app.state().j_coords);
+									app.Julia(app.current_state.j_coords);
 									break;
 								}
 
@@ -183,7 +205,7 @@ int main(int argc, char** argv) {
 						}
 						else {
 							app.StopRenderAsync();
-							app.state().next_color_scheme();
+							app.current_state.next_color_scheme();
 							app.StartRenderAsync();
 							change_history = true;
 							change_overlay = true;
@@ -196,9 +218,9 @@ int main(int argc, char** argv) {
 
 				break;
 			case sf::Event::MouseButtonPressed:
-				switch (app.event.mouseButton.button) {
+				switch (event.mouseButton.button) {
 				case sf::Mouse::Left:
-					if (MouseInView(app._window)) {
+					if (MouseInView(app.canvas())) {
 						app.StopRenderAsync();
 						app.Magnify();
 						app.StartRenderAsync();
@@ -209,7 +231,7 @@ int main(int argc, char** argv) {
 
 					break;
 				case sf::Mouse::Right:
-					if (MouseInView(app._window) && app.state().models.size() > 1) {
+					if (MouseInView(app.canvas()) && app.current_state.models.size() > 1) {
 						app.StopRenderAsync();
 						app.Demagnify();
 						app.StartRenderAsync();

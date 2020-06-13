@@ -16,16 +16,16 @@ Overlay::Overlay(font_t& font, geo_ptr& scales) :
 	_iteration(0),
 	_max_iterations(DEFAULT_MAX_ITERATIONS)
 {
-	add_text_item((int_t)LabelIndex::TITLE);
-	add_text_item((int_t)LabelIndex::MOUSE_X);
-	add_text_item((int_t)LabelIndex::MOUSE_Y);
-	add_text_item((int_t)LabelIndex::POWER);
-	add_text_item((int_t)LabelIndex::MAGNIFICATION);
-	add_text_item((int_t)LabelIndex::ITERATION);
-	add_text_item((int_t)LabelIndex::ALGORITHM);
-	add_text_item((int_t)LabelIndex::COLOR_SCHEME);
-	add_text_item(INIT_X_POS, INIT_Y_POS + ((int_t)LabelIndex::RENDERING) * ITEM_HEIGHT + 15);
-	add_text_item(INIT_X_POS, INIT_Y_POS + ((int_t)LabelIndex::NOTIFICATION) * ITEM_HEIGHT + 15);
+	add_text_item(TO_INT(LabelIndex::TITLE));
+	add_text_item(TO_INT(LabelIndex::MOUSE_X));
+	add_text_item(TO_INT(LabelIndex::MOUSE_Y));
+	add_text_item(TO_INT(LabelIndex::POWER));
+	add_text_item(TO_INT(LabelIndex::MAGNIFICATION));
+	add_text_item(TO_INT(LabelIndex::ITERATION));
+	add_text_item(TO_INT(LabelIndex::ALGORITHM));
+	add_text_item(TO_INT(LabelIndex::COLOR_SCHEME));
+	add_text_item(INIT_X_POS, INIT_Y_POS + (TO_INT(LabelIndex::RENDERING)) * ITEM_HEIGHT + 15);
+	add_text_item(INIT_X_POS, INIT_Y_POS + (TO_INT(LabelIndex::NOTIFICATION)) * ITEM_HEIGHT + 15);
 
 	type(MANDELBROT, INIT_PAIR);
 	power(DEFAULT_POWER);
@@ -89,7 +89,7 @@ Overlay& Overlay::type(int_t type, pair_t coords) {
 }
 
 Overlay& Overlay::title(const std::string& title) {
-	_labels[(int_t)LabelIndex::TITLE].setString(title);
+	_labels[TO_INT(LabelIndex::TITLE)].setString(title);
 	return *this;
 }
 
@@ -100,17 +100,17 @@ Overlay& Overlay::init_title() {
 
 Overlay& Overlay::julia_title(pair_t coordinates) {
 	title(
-		"Julia Set (" + to_string(coordinates.first, DISPLAY_PRECISION)
-		+ ", " + to_string(coordinates.secnd, DISPLAY_PRECISION) + ")"
+		"Julia Set (" + to_string(coordinates.re(), DISPLAY_PRECISION)
+		       + ", " + to_string(coordinates.im(), DISPLAY_PRECISION) + ")"
 	);
 	return *this;
 }
 
 Overlay& Overlay::power(int_t value) {
 	if (value > 0)
-		_labels[(int)LabelIndex::POWER].setString("z^" + std::to_string(value) + " + c");
+		_labels[(int)LabelIndex::POWER].setString(mnd::PowerUnitFunctionName(value));
 	else
-		_labels[(int)LabelIndex::POWER].setString(GetFunctionName((-1)*value));
+		_labels[(int)LabelIndex::POWER].setString(mnd::GetFunctionName((-1)*value));
 
 	return *this;
 }
@@ -119,7 +119,7 @@ Overlay& Overlay::magnification(int_t value) {
 	_labels[(int)LabelIndex::MAGNIFICATION]
 		.setString(
 			"Magnification:  "
-			+ std::to_string((int_t)pow(TrackingBox::factor, value))
+			+ std::to_string(TO_INT(pow(TrackingBox::factor, value)))
 		);
 	return *this;
 }
@@ -135,12 +135,12 @@ Overlay& Overlay::iteration(int_t it, int_t max) {
 }
 
 Overlay& Overlay::algorithm(int_t value) {
-	_labels[(int)LabelIndex::ALGORITHM].setString("Algorithm:  " + Overlay::GetAlgorithmName(value));
+	_labels[(int)LabelIndex::ALGORITHM].setString("Algorithm:  " + mnd::GetAlgorithmName(value));
 	return *this;
 }
 
 Overlay& Overlay::color_scheme(int_t value) {
-	_labels[(int)LabelIndex::COLOR_SCHEME].setString("Color Scheme:  " + Overlay::GetColorSchemeName(value));
+	_labels[(int)LabelIndex::COLOR_SCHEME].setString("Color Scheme:  " + mnd::GetColorSchemeName(value));
 	return *this;
 }
 
@@ -154,8 +154,7 @@ Overlay& Overlay::rendering(bool isRendering) {
 	return *this;
 }
 
-Overlay& Overlay::state(const State& other)
-{
+Overlay& Overlay::state(const State& other) {
 	type(other.type, other.j_coords);
 	power(other.power);
 	magnification(other.magnification);
@@ -165,51 +164,21 @@ Overlay& Overlay::state(const State& other)
 	return *this;
 }
 
-std::string Overlay::GetFunctionName(int_t index) {
-	switch ((Functions)(index - 1)) {
-	case Functions::OPAL_VEIN:
-		return "z * (sin(Re(z)), cos(Im(z))) + c";
-	default:
-		return "";
-	}
-}
-
-std::string Overlay::GetAlgorithmName(int_t index) {
-	switch ((Algorithms)index) {
-	case Algorithms::ESCAPE_TIME:
-		return "Escape Time";
-	case Algorithms::POTENTIAL:
-		return "Potential";
-	default: return "";
-	}
-}
-
-std::string Overlay::GetColorSchemeName(int_t index) {
-	switch ((ColorSchemes)index) {
-	case ColorSchemes::LINEAR:
-		return "Linear";
-	case ColorSchemes::HYPERBOLIC:
-		return "Hyperbolic";
-	case ColorSchemes::LOGARITHMIC:
-		return "Logarithmic";
-	case ColorSchemes::CIRCULAR:
-		return "Circular";
-	default: return "";
-	}
-}
-
 int_t TrackingBox::factor = DEFAULT_ZOOM;
 
-int_t TrackingBox::box_width = WIDTH_PIXELS / TrackingBox::factor;
-int_t TrackingBox::box_height = HEIGHT_PIXELS / TrackingBox::factor;
-
-int_t TrackingBox::box_x_radius = TrackingBox::box_width / 2;
-int_t TrackingBox::box_y_radius = TrackingBox::box_height / 2;
+// int_t TrackingBox::box_width = WIDTH_PIXELS / TrackingBox::factor;
+// int_t TrackingBox::box_height = HEIGHT_PIXELS / TrackingBox::factor;
+// 
+// int_t TrackingBox::box_x_radius = TrackingBox::box_width / 2;
+// int_t TrackingBox::box_y_radius = TrackingBox::box_height / 2;
 
 TrackingBox::TrackingBox(canvas_t& canvas) :
-	_shape(sf::Vector2f{ (float)TrackingBox::box_width, (float)TrackingBox::box_height })
+	_shape(sf::Vector2f{
+		static_cast<float>(canvas.getSize().x / TrackingBox::factor), // TrackingBox::box_width),
+		static_cast<float>(canvas.getSize().y / TrackingBox::factor), // TrackingBox::box_height)
+	})
 {
-	_shape.setPosition((flt_t)sf::Mouse::getPosition(canvas).x, (flt_t)sf::Mouse::getPosition(canvas).y);
+	_shape.setPosition(sf::Mouse::getPosition(canvas).x, sf::Mouse::getPosition(canvas).y);
 	_shape.setOutlineColor(sf::Color(255, 255, 255, 128));
 	_shape.setOutlineThickness(-3.f);
 	_shape.setFillColor(sf::Color::Transparent);
@@ -250,10 +219,10 @@ void TrackingBox::draw_to(canvas_t& canvas) {
 model_t TrackingBox::get_boundaries(const Geometry2D& geo) const {
 	auto rect = _shape.getGlobalBounds();
 	return model_t{
-		geo.coord_x((int_t)rect.left),
-		geo.coord_x((int_t)rect.left + (int_t)rect.width),
-		geo.coord_y((int_t)rect.top),
-		geo.coord_y((int_t)rect.top + (int_t)rect.height)
+		geo.coord_x(TO_INT(rect.left)),
+		geo.coord_x(TO_INT(rect.left) + TO_INT(rect.width)),
+		geo.coord_y(TO_INT(rect.top)),
+		geo.coord_y(TO_INT(rect.top) + TO_INT(rect.height))
 	};
 }
 

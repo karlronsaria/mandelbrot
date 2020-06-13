@@ -1,89 +1,123 @@
 #include "Mandelbrot.h"
-#include <stack>
 
-template <typename T>
-OrderedPair<T> mult(const OrderedPair<T>& a, const OrderedPair<T>& b)
-{
-	return OrderedPair<T>{
-		a.first * b.first - a.secnd * b.secnd,
-		a.first * b.secnd + a.secnd * b.first
-	};
+std::vector<complex_f> Mandelbrot::_complex_functions = Mandelbrot::GetFunctions();
+std::vector<algorithm_f> Mandelbrot::_algorithms = Mandelbrot::GetAlgorithms();
+std::vector<color_code_f> Mandelbrot::_color_schemes = Mandelbrot::GetColorSchemes();
+
+complex_f Mandelbrot::FunctionByIndex(int_t index) {
+	return _complex_functions[index];
 }
 
-template <typename T>
-OrderedPair<T>& OrderedPair<T>::operator+=(const OrderedPair<T>& other)
-{
-	first = first + other.first;
-	secnd = secnd + other.secnd;
-	return *this;
+complex_f Mandelbrot::FunctionByOrder(int_t order) {
+	if (order > 0)
+		return _complex_functions[TO_INT(Functions::UNIT_POWER)];
+
+	return _complex_functions[(-1) * (order + TO_INT(Functions::OPAL_VEIN))];
 }
 
-template <typename T>
-const OrderedPair<T> OrderedPair<T>::operator+(const OrderedPair<T>& other) const
-{
-	auto temp = *this;
-	temp += other;
-	return temp;
+color_code_f Mandelbrot::ColorSchemeByIndex(int_t index) {
+	return _color_schemes[index];
 }
 
-template <typename T>
-OrderedPair<T>& OrderedPair<T>::operator*=(const OrderedPair<T>& other)
-{
-	*this = OrderedPair<T>{
-		first * other.first - secnd * other.secnd,
-		first * other.secnd + secnd * other.first
-	};
-
-	return *this;
+algorithm_f Mandelbrot::AlgorithmByIndex(int_t index) {
+	return _algorithms[index];
 }
 
-template <typename T>
-const OrderedPair<T> OrderedPair<T>::operator*(const OrderedPair<T>& other) const
-{
-	OrderedPair<T> temp = *this;
-	temp *= other;
-	return temp;
+std::vector<complex_f> Mandelbrot::GetFunctions() {
+	std::vector<complex_f> list;
+	list.push_back(complex_unit_power);     // 0
+	list.push_back(complex_opal_vein);      // 1
+	list.push_back(complex_collatz_map);    // 2
+	list.push_back(complex_collatz_map_2);  // 3
+//  list.push_back(other);                  // 4
+	return list;
 }
 
-flt_t abs(const pair_t& complex)
-{
-	return sqrt(complex.first * complex.first + complex.secnd * complex.secnd);
+std::vector<algorithm_f> Mandelbrot::GetAlgorithms() {
+	std::vector<algorithm_f> list;
+	list.push_back(EscapeTime);
+	list.push_back(Potential);
+	return list;
 }
 
-pair_t pow(const pair_t& complex, int_t power)
-{
-	pair_t temp = { 1.f, 0.f };
+std::vector<color_code_f> Mandelbrot::GetColorSchemes() {
+	std::vector<color_code_f> list;
+	list.push_back(GetColorLinear);
+	list.push_back(GetColorHyperbolic);
+	list.push_back(GetColorLogarithmic);
+	list.push_back(GetColorCircular);
+	return list;
+}
 
-	for (int i = 0; i < power; ++i)
-	{
-		temp *= complex;
+std::string Mandelbrot::PowerUnitFunctionName(int_t power) {
+	return "z^" + std::to_string(power) + " + c";
+}
+
+std::string Mandelbrot::GetFunctionName(int_t index) {
+	switch ((Functions)(index - 1)) {
+	case Functions::COLLATZ_MAP_2:
+		return "Collatz Map 2";
+	case Functions::COLLATZ_MAP:
+		return "Collatz Map";
+	case Functions::OPAL_VEIN:
+		return "z * (sin(Re(z)), cos(Im(z))) + c";
+	default:
+		return "";
 	}
-
-	return temp;
 }
 
-flt_t sqr_sum(const pair_t& complex)
-{
-	return complex.first * complex.first + complex.secnd * complex.secnd;
+std::string Mandelbrot::GetAlgorithmName(int_t index) {
+	switch ((Algorithms)index) {
+	case Algorithms::ESCAPE_TIME:
+		return "Escape Time";
+	case Algorithms::POTENTIAL:
+		return "Potential";
+	default: return "";
+	}
 }
 
-pair_t complex_unit_power(pair_t z, pair_t c, int_t power)
-{
+std::string Mandelbrot::GetColorSchemeName(int_t index) {
+	switch ((ColorSchemes)index) {
+	case ColorSchemes::LINEAR:
+		return "Linear";
+	case ColorSchemes::HYPERBOLIC:
+		return "Hyperbolic";
+	case ColorSchemes::LOGARITHMIC:
+		return "Logarithmic";
+	case ColorSchemes::CIRCULAR:
+		return "Circular";
+	default: return "";
+	}
+}
+
+pair_t Mandelbrot::complex_unit_power(pair_t z, pair_t c, int_t power) {
 	return pow(z, power) + c;
 }
 
-pair_t complex_opal_vein(pair_t z, pair_t c, int_t power)
-{
-	return z * pair_t{ sin(z.first), cos(z.secnd) } + c;
+pair_t Mandelbrot::complex_opal_vein(pair_t z, pair_t c, int_t power) {
+	return z * pair_t( sin(z.re()), cos(z.im()) ) + c;
 }
 
-sf::Uint8 min(sf::Uint8 first, sf::Uint8 secnd)
-{
+pair_t Mandelbrot::complex_collatz_map(pair_t z, pair_t c, int_t power) {
+	return (
+		   c                * pow(cos(c * (PI/2)), 2)
+		+ (c * (3.f) + 1.f) * pow(sin(c * (PI/2)), 2)
+	) * (0.5f) * COLLATZ_BIAS;
+}
+
+pair_t Mandelbrot::complex_collatz_map_2(pair_t z, pair_t c, int_t power) {
+	return (
+		cos(c * PI) + 1.f
+		+ (cos(c * PI) + 1.f) * (c * 3.f + 1.f) * (1/16.f)
+		* (cos((c * 2.f + -1.f) * (PI/4.f)) * (-sqrt(2.f)) + 3.f)
+	) * (0.25f) * COLLATZ_BIAS;
+}
+
+sf::Uint8 Mandelbrot::min(sf::Uint8 first, sf::Uint8 secnd) {
 	return first < secnd ? first : secnd;
 }
 
-sf::Uint8 max(sf::Uint8 first, sf::Uint8 secnd)
-{
+sf::Uint8 Mandelbrot::max(sf::Uint8 first, sf::Uint8 secnd) {
 	return first > secnd ? first : secnd;
 }
 
@@ -95,8 +129,7 @@ sf::Uint8 max(sf::Uint8 first, sf::Uint8 secnd)
 //    2020_05_10
 //    
 // hue: 0-360°; sat: 0.f-1.f; val: 0.f-1.f
-sf::Color HsvToColor(int_t hue, flt_t sat, flt_t val)
-{
+sf::Color Mandelbrot::HsvToColor(int_t hue, flt_t sat, flt_t val) {
 	hue %= 360;
 	while (hue < 0) hue += 360;
 
@@ -131,13 +164,12 @@ sf::Color HsvToColor(int_t hue, flt_t sat, flt_t val)
 // Retrieved:
 //    2020_05_12
 //    
-void ColorToHsv(const sf::Color& color, int_t& hue, flt_t& sat, flt_t& val)
-{
+void Mandelbrot::ColorToHsv(const sf::Color& color, int_t& hue, flt_t& sat, flt_t& val) {
 	// R, G, B values are divided by 255 
 	// to change the range from 0..255 to 0..1 
-	auto r = color.r / 255.0;
-	auto g = color.g / 255.0;
-	auto b = color.b / 255.0;
+	auto r = color.r / 255.f;
+	auto g = color.g / 255.f;
+	auto b = color.b / 255.f;
 
 	// h, s, v = hue, saturation, value 
 	double cmax = max(r, max(g, b)); // maximum of r, g, b 
@@ -150,17 +182,17 @@ void ColorToHsv(const sf::Color& color, int_t& hue, flt_t& sat, flt_t& val)
 	if (cmax == cmin)
 		hue = 0;
 
-	// if cmax equal r then compute h 
+	// if cmax equal r then compute h
 	else if (cmax == r)
-		hue = (int_t)(60 * ((g - b) / diff) + 360) % 360;
+		hue = TO_INT(60 * ((TO_INT(g) - TO_INT(b)) / diff) + 360) % 360;
 
-	// if cmax equal g then compute h 
+	// if cmax equal g then compute h
 	else if (cmax == g)
-		hue = (int_t)(60 * ((b - r) / diff) + 120) % 360;
+		hue = TO_INT(60 * ((TO_INT(b) - TO_INT(r)) / diff) + 120) % 360;
 
-	// if cmax equal b then compute h 
+	// if cmax equal b then compute h
 	else if (cmax == b)
-		hue = (int_t)(60 * ((r - g) / diff) + 240) % 360;
+		hue = TO_INT(60 * ((TO_INT(r) - TO_INT(g)) / diff) + 240) % 360;
 
 	// if cmax equal zero
 	sat = cmax ? (diff / cmax) * 100 : 0;
@@ -169,78 +201,23 @@ void ColorToHsv(const sf::Color& color, int_t& hue, flt_t& sat, flt_t& val)
 	val = cmax * 100;
 }
 
-sf::Color GetColorLinear(flt_t value)
-{
+sf::Color Mandelbrot::GetColorLinear(flt_t value) {
 	return HsvToColor(value + INIT_HUE, 1.f, 1.f);
 }
 
-sf::Color GetColorHyperbolic(flt_t value)
-{
+sf::Color Mandelbrot::GetColorHyperbolic(flt_t value) {
 	return HsvToColor(MAX_HUE / value + INIT_HUE, 1.f - 1.f / value, 1.f);
 }
 
-sf::Color GetColorLogarithmic(flt_t value)
-{
+sf::Color Mandelbrot::GetColorLogarithmic(flt_t value) {
 	return HsvToColor(10 * log(value) + INIT_HUE, 1.f, 1.f);
 }
 
-sf::Color GetColorCircular(flt_t value)
-{
+sf::Color Mandelbrot::GetColorCircular(flt_t value) {
 	return HsvToColor(100 * sin(value) + INIT_HUE, 1.f, 1.f);
 }
 
-// pair_t PassThrough(const Geometry2D& geo, const pair_t& c)
-// {
-// 	return c;
-// }
-// 
-// pair_t Transform(const Geometry2D& geo, const pair_t& c)
-// {
-// 	return pair_t{ geo.coord_x(c.first), geo.coord_y(c.secnd) };
-// }
-
-// bool RenderEscapeTimePixel(RenderInfo& info, int_t x, int_t y, pair_t c, color_code_f ColorCoding, complex_f f, transform_f NewPair)
-// {
-// 	if (info.image.getPixel(x, y) == INIT_COLOR)
-// 	{
-// 		auto index = (info.view.right - info.view.left) * y + x;
-// 		
-// 		info.plot[index] = f(info.plot[index], NewPair(info.geo, c), info.power);
-// 		
-// 		if (sqr_sum(info.plot[index]) > ESCAPE_THRESHOLD * ESCAPE_THRESHOLD)
-// 		{
-// 			info.image.setPixel(x, y, ColorCoding(info.iteration * 10));
-// 			return true;
-// 		}
-// 	}
-// 
-// 	return false;
-// }
-// 
-// bool RenderPotentialPixel(RenderInfo& info, int_t x, int_t y, pair_t c, color_code_f ColorCoding, complex_f f, transform_f NewPair)
-// {
-// 	if (info.image.getPixel(x, y) == INIT_COLOR)
-// 	{
-// 		flt_t temp;
-// 		auto index = (info.view.right - info.view.left) * y + x;
-// 
-// 		info.plot[index] = f(info.plot[index], NewPair(info.geo, c), info.power);
-// 
-// 		temp = sqr_sum(info.plot[index]);
-// 
-// 		if (temp > 360LL*360LL)
-// 		{
-// 			temp = pow(2, info.iteration) / log(temp);
-// 			info.image.setPixel(x, y, ColorCoding(180 * temp));
-// 			return true;
-// 		}
-// 	}
-// 
-// 	return false;
-// }
-
-int_t EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, complex_f f)
-{
+int_t Mandelbrot::EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, complex_f f) {
 	z = f(z, c, power);
 
 	if (sqr_sum(z) > ESCAPE_THRESHOLD * ESCAPE_THRESHOLD)
@@ -249,8 +226,7 @@ int_t EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, compl
 	return -1LL;
 }
 
-int_t Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, complex_f f)
-{
+int_t Mandelbrot::Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, complex_f f) {
 	flt_t temp;
 	z = f(z, c, power);
 	temp = sqr_sum(z);
