@@ -3,7 +3,7 @@
 view_t State::_init_view = { 0LL, 1LL, 0LL, 1LL };
 
 int_t min_power() {
-	return 2LL - TO_INT(mnd::Functions::COUNT);
+	return 2LL - mnd::NUM_FUNCTIONS;
 }
 
 model_stack_t init_model_stack() {
@@ -31,11 +31,12 @@ model_stack_t pop(model_stack_t models) {
 State::State() :
 	view(State::_init_view),
 	models(::init_model_stack()),
-	type(MANDELBROT),
+	type(mnd::MANDELBROT),
 	j_coords(INIT_PAIR),
 	power(DEFAULT_POWER),
 	magnification(DEFAULT_MAGNIFICATION),
 	max_iterations(DEFAULT_MAX_ITERATIONS),
+	threshold(DEFAULT_THRESHOLD),
 	color_scheme_index(0),
 	algorithm_index(0)
 {}
@@ -43,11 +44,12 @@ State::State() :
 State::State(int_t width_pixels, int_t height_pixels) :
 	view(view_t{ 0LL, width_pixels, 0LL, height_pixels }),
 	models(::init_model_stack()),
-	type(MANDELBROT),
+	type(mnd::MANDELBROT),
 	j_coords(INIT_PAIR),
 	power(DEFAULT_POWER),
 	magnification(DEFAULT_MAGNIFICATION),
 	max_iterations(DEFAULT_MAX_ITERATIONS),
+	threshold(DEFAULT_THRESHOLD),
 	color_scheme_index(0),
 	algorithm_index(0)
 {
@@ -62,6 +64,7 @@ State::State(
 	int_t somePower,
 	int_t someMagnification,
 	int_t someMaxIterations,
+	int_t someThreshold,
 	int_t someColorSchemeIndex,
 	int_t someAlgorithmIndex
 ) :
@@ -72,6 +75,7 @@ State::State(
 	power(somePower),
 	magnification(someMagnification),
 	max_iterations(someMaxIterations),
+	threshold(someThreshold),
 	color_scheme_index(someColorSchemeIndex),
 	algorithm_index(someAlgorithmIndex)
 {}
@@ -158,6 +162,28 @@ State& State::init_max_iterations() {
 	return new_max_iterations(DEFAULT_MAX_ITERATIONS);
 }
 
+State& State::init_threshold() {
+	threshold = DEFAULT_THRESHOLD;
+	return *this;
+}
+
+State& State::next_threshold() {
+	threshold =
+		threshold == mnd::NUM_THRESHOLDS - 1
+		? 0 : threshold + 1;
+
+	return *this;
+}
+
+State& State::prev_threshold() {
+	threshold =
+		threshold == 0
+		? mnd::NUM_THRESHOLDS - 1
+		: threshold - 1;
+
+	return *this;
+}
+
 State& State::new_algorithm(int_t value) {
 	algorithm_index = value;
 	return *this;
@@ -165,7 +191,7 @@ State& State::new_algorithm(int_t value) {
 
 State& State::next_algorithm() {
 	algorithm_index =
-		algorithm_index == TO_INT(mnd::Algorithms::COUNT) - 1
+		algorithm_index == mnd::NUM_ALGORITHMS - 1
 		? 0 : algorithm_index + 1;
 
 	return *this;
@@ -174,7 +200,7 @@ State& State::next_algorithm() {
 State& State::prev_algorithm() {
 	algorithm_index =
 		algorithm_index == 0
-		? TO_INT(mnd::Algorithms::COUNT) - 1
+		? mnd::NUM_ALGORITHMS - 1
 		: algorithm_index - 1;
 
 	return *this;
@@ -187,7 +213,7 @@ State& State::new_color_scheme(int_t value) {
 
 State& State::next_color_scheme() {
 	color_scheme_index =
-		color_scheme_index == TO_INT(mnd::ColorSchemes::COUNT) - 1
+		color_scheme_index == mnd::NUM_COLOR_SCHEMES - 1
 		? 0 : color_scheme_index + 1;
 
 	return *this;
@@ -196,7 +222,7 @@ State& State::next_color_scheme() {
 State& State::prev_color_scheme() {
 	color_scheme_index =
 		color_scheme_index == 0
-		? TO_INT(mnd::ColorSchemes::COUNT) - 1
+		? mnd::NUM_COLOR_SCHEMES - 1
 		: color_scheme_index - 1;
 
 	return *this;

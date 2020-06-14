@@ -26,23 +26,34 @@ public:
 	Complex& operator+=(const Complex& other);
 	Complex& operator-=(const Complex& other);
 	Complex& operator*=(const Complex& other);
+	Complex& operator/=(const Complex& other);
 	Complex& operator+=(const T& scalar);
 	Complex& operator-=(const T& scalar);
 	Complex& operator*=(const T& scalar);
+	Complex& operator/=(const T& scalar);
 
 	// See CONST_BINARY_OPERATOR below
 	const Complex operator+(const Complex& other) const;
 	const Complex operator-(const Complex& other) const;
 	const Complex operator*(const Complex& other) const;
+	const Complex operator/(const Complex& other) const;
 	const Complex operator+(const T& scalar) const;
 	const Complex operator-(const T& scalar) const;
 	const Complex operator*(const T& scalar) const;
+	const Complex operator/(const T& scalar) const;
 };
 
 typedef Complex<flt_t> pair_t;
 
+template <typename T>
+Complex<T> conj(const Complex<T>& complex) {
+	return Complex<T>(complex.re(), -complex.im());
+}
+
 pair_t cos(const pair_t& complex);
 pair_t sin(const pair_t& complex);
+pair_t exp(const pair_t& complex);
+pair_t log(const pair_t& complex);
 flt_t abs(const pair_t& complex);
 flt_t phase(const pair_t& complex);
 pair_t pow(const pair_t& complex, int_t power);
@@ -96,6 +107,26 @@ Complex<T>& Complex<T>::operator*=(const Complex<T>& other) {
 	return *this;
 }
 
+/*
+	z / w
+	
+		= (abs(z) exp(i arg(z))) / (abs(w) exp(i arg(w)))
+		= (abs(z) / abs(w)) exp(i (arg(z) - arg(w)))
+		= (abs(z) / abs(w))( cos(arg(z) - arg(w)) + i sin(arg(z) - arg(w)) )
+*/
+template <typename T>
+Complex<T>& Complex<T>::operator/=(const Complex<T>& other) {
+	auto Mod = abs(*this) / abs(other);
+	auto Arg = phase(*this) - phase(other);
+
+	_pair = {
+		Mod * cos(Arg),
+		Mod * sin(Arg)
+	};
+
+	return *this;
+}
+
 template <typename T>
 Complex<T>& Complex<T>::operator+=(const T& scalar) {
 	_pair.first = re() + scalar;
@@ -118,6 +149,16 @@ Complex<T>& Complex<T>::operator*=(const T& scalar) {
 	return *this;
 }
 
+template <typename T>
+Complex<T>& Complex<T>::operator/=(const T& scalar) {
+	_pair = {
+		re() / scalar,
+		im() / scalar
+	};
+
+	return *this;
+}
+
 #define CONST_BINARY_OPERATOR(CLASS, TYPE, OP) \
 const CLASS CLASS::operator OP (const TYPE & value) const { \
 	auto temp = *this; \
@@ -125,9 +166,29 @@ const CLASS CLASS::operator OP (const TYPE & value) const { \
 	return temp; \
 }
 
+#define STATIC_CONST_BINARY_OPERATOR(CLASS, TYPE, OP) \
+const CLASS operator OP (const TYPE & scalar, const CLASS & vector) { \
+	return vector OP scalar; \
+}
+
 template <typename T> CONST_BINARY_OPERATOR(Complex<T>, Complex<T>, +)
 template <typename T> CONST_BINARY_OPERATOR(Complex<T>, Complex<T>, -)
 template <typename T> CONST_BINARY_OPERATOR(Complex<T>, Complex<T>, *)
+template <typename T> CONST_BINARY_OPERATOR(Complex<T>, Complex<T>, /)
 template <typename T> CONST_BINARY_OPERATOR(Complex<T>, T, +)
 template <typename T> CONST_BINARY_OPERATOR(Complex<T>, T, -)
 template <typename T> CONST_BINARY_OPERATOR(Complex<T>, T, *)
+template <typename T> CONST_BINARY_OPERATOR(Complex<T>, T, /)
+
+template <typename T> STATIC_CONST_BINARY_OPERATOR(Complex<T>, T, +)
+template <typename T> STATIC_CONST_BINARY_OPERATOR(Complex<T>, T, *)
+
+template <typename T>
+const Complex<T> operator-(const T& scalar, const Complex<T>& vector) {
+	return scalar + (-vector);
+}
+
+template <typename T>
+const Complex<T> operator/(const T& scalar, const Complex<T>& vector) {
+	return pair_t{ scalar, 0 } / vector;
+}

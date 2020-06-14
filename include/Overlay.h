@@ -25,17 +25,18 @@ private:
 	int_t _max_iterations;
 
 	enum class LabelIndex {
-		TITLE,
-		MOUSE_X,
-		MOUSE_Y,
-		POWER,
-		MAGNIFICATION,
-		ITERATION,
-		ALGORITHM,
-		COLOR_SCHEME,
-		RENDERING,
-		NOTIFICATION,
-		COUNT
+		  TITLE
+		, MOUSE_X
+		, MOUSE_Y
+		, POWER
+		, MAGNIFICATION
+		, ITERATION
+		, THRESHOLD
+		, ALGORITHM
+		, COLOR_SCHEME
+		, RENDERING
+		, NOTIFICATION
+		, COUNT
 	};
 public:
 	Overlay() = delete;
@@ -61,6 +62,7 @@ public:
 	Overlay& magnification(int_t value);
 	Overlay& iteration(int_t it);
 	Overlay& iteration(int_t it, int_t max);
+	Overlay& threshold(int_t value);
 	Overlay& algorithm(int_t value);
 	Overlay& color_scheme(int_t value);
 	Overlay& notification(const std::string& message);

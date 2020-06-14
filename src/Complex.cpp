@@ -36,6 +36,42 @@ pair_t sin(const pair_t& complex) {
 	);
 }
 
+/*
+	exp(a + bi)
+
+		= exp(a) exp(bi)
+		= exp(a)( cos(b) + i sin(b) )
+*/
+pair_t exp(const pair_t& complex) {
+	auto temp = exp(complex.re());
+
+	return pair_t(
+		temp * cos(complex.im()),
+		temp * sin(complex.im())
+	);
+}
+
+/*
+	Suppose
+
+		a + bi = ln(z)
+
+	Then
+
+		exp(a + bi) = z
+		exp(a) exp(bi) = z
+		exp(a) exp(bi) = abs(z) exp(i arg(z))
+
+	Then
+
+		exp(a) = abs(z)
+		a = ln(abs(z))
+		b = arg(z)
+*/
+pair_t log(const pair_t& complex) {
+	return pair_t{ log(abs(complex)), phase(complex) };
+}
+
 flt_t abs(const pair_t& complex) {
 	return sqrt(complex.re() * complex.re() + complex.im() * complex.im());
 }
@@ -50,6 +86,13 @@ flt_t abs(const pair_t& complex) {
 	}
 */
 flt_t phase(const pair_t& complex) {
+	if (complex.re() == 0) {
+		if (complex.im() > 0)
+			return PI / 2;
+
+		return 3 * PI / 2;
+	}
+
 	flt_t arg = atan(fabs(complex.im()) / fabs(complex.re()));
 
 	if (complex.re() > 0) {
@@ -79,7 +122,7 @@ pair_t pow(const pair_t& complex, int_t power) {
 	
 		= (abs(a + bi) * e(i arg(a + bi)))^n
 		= abs^n (a + bi) * e(i n arg(a + bi))
-		= abs^n (a + bi) * ( cos(n arg(a + bi)) + sin(n arg(a + bi)) i )
+		= abs^n (a + bi) * ( cos(n arg(a + bi)) + i sin(n arg(a + bi)) )
 		= abs^n (a + bi) * ( cos(n arg(a + bi)), sin(n arg(a + bi)) )
 */
 pair_t fpow(const pair_t& complex, flt_t power) {

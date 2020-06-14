@@ -20,13 +20,14 @@ private:
 	int_t _iteration;
 	int_t _max_iterations;
 	int_t _power;
+	int_t _threshold;
 	pair_t _j_coords;
 	plot_t _plot;
 	std::reference_wrapper<sf::Image> _image;
 	std::reference_wrapper<Overlay> _display;
-	complex_f _fnc;
-	color_code_f _col;
-	algorithm_f _alg;
+	mnd::complex_f _fnc;
+	mnd::color_code_f _col;
+	mnd::algorithm_f _alg;
 
 	bool ColorPixel(sf::Image& someImage, int_t x, int_t y, pair_t c);
 	bool ColorMandelbrotPixel(sf::Image& someImage, int_t x, int_t y);

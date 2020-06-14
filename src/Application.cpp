@@ -130,12 +130,12 @@ std::string Application::NewFileName(std::string extension) const {
 
 void Application::Mandelbrot() {
 	current_state
-		.new_type(MANDELBROT);
+		.new_type(mnd::MANDELBROT);
 }
 
 void Application::Julia(pair_t coordinates) {
 	current_state
-		.new_type(JULIA)
+		.new_type(mnd::JULIA)
 		.new_j_coords(coordinates);
 }
 
@@ -145,6 +145,27 @@ void Application::PushHistory() {
 
 void Application::PushOverlay() {
 	_main_overlay.state(current_state);
+}
+
+void Application::ChangeState(std::function<void()> action_f) {
+	StopRenderAsync();
+	action_f();
+	StartRenderAsync();
+	Application::delay_next_poll = true;
+}
+
+void Application::RestartRender() {
+	ChangeState([]() {});
+}
+
+void Application::ChangeOverlay(std::function<void()> action_f) {
+	ChangeState(action_f);
+	PushOverlay();
+}
+
+void Application::ChangeOverlayAndHistory(std::function<void()> action_f) {
+	ChangeOverlay(action_f);
+	PushOverlay();
 }
 
 bool Application::GoToPreviousState() {
@@ -448,7 +469,7 @@ bool Application::EnterNewCoordinates(pair_t& coords) {
 }
 
 void Application::StartRenderAsync() {
-	_image.create(current_state.view.right, current_state.view.bottom, INIT_COLOR);
+	_image.create(current_state.view.right, current_state.view.bottom, mnd::INIT_COLOR);
 	Renderer::Threads::rendering = true;
 	_render_thread = std::thread(
 		[i = std::ref(_image), o = std::ref(_main_overlay), s = current_state]() {
@@ -509,6 +530,8 @@ bool Application::TogglePauseRender() {
 	else {
 		StartTimedMessageAsync("Unpaused.");
 	}
+
+	return Renderer::Threads::paused;
 }
 
 bool Application::IsOpen() const {

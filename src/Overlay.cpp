@@ -22,15 +22,17 @@ Overlay::Overlay(font_t& font, geo_ptr& scales) :
 	add_text_item(TO_INT(LabelIndex::POWER));
 	add_text_item(TO_INT(LabelIndex::MAGNIFICATION));
 	add_text_item(TO_INT(LabelIndex::ITERATION));
+	add_text_item(TO_INT(LabelIndex::THRESHOLD));
 	add_text_item(TO_INT(LabelIndex::ALGORITHM));
 	add_text_item(TO_INT(LabelIndex::COLOR_SCHEME));
 	add_text_item(INIT_X_POS, INIT_Y_POS + (TO_INT(LabelIndex::RENDERING)) * ITEM_HEIGHT + 15);
 	add_text_item(INIT_X_POS, INIT_Y_POS + (TO_INT(LabelIndex::NOTIFICATION)) * ITEM_HEIGHT + 15);
 
-	type(MANDELBROT, INIT_PAIR);
+	type(mnd::MANDELBROT, INIT_PAIR);
 	power(DEFAULT_POWER);
 	magnification(DEFAULT_MAGNIFICATION);
 	iteration(_iteration, _max_iterations);
+	threshold(DEFAULT_THRESHOLD);
 	algorithm(DEFAULT_ALGORITHM_INDEX);
 	color_scheme(DEFAULT_COLOR_SCHEME_INDEX);
 }
@@ -77,10 +79,10 @@ Geometry2D Overlay::scales() const {
 
 Overlay& Overlay::type(int_t type, pair_t coords) {
 	switch (type) {
-	case MANDELBROT:
+	case mnd::MANDELBROT:
 		init_title();
 		break;
-	case JULIA:
+	case mnd::JULIA:
 		julia_title(coords);
 		break;
 	};
@@ -110,7 +112,7 @@ Overlay& Overlay::power(int_t value) {
 	if (value > 0)
 		_labels[(int)LabelIndex::POWER].setString(mnd::PowerUnitFunctionName(value));
 	else
-		_labels[(int)LabelIndex::POWER].setString(mnd::GetFunctionName((-1)*value));
+		_labels[(int)LabelIndex::POWER].setString(mnd::FUNCTION_NAMES[-value]);
 
 	return *this;
 }
@@ -134,13 +136,18 @@ Overlay& Overlay::iteration(int_t it, int_t max) {
 	return iteration(it);
 }
 
+Overlay& Overlay::threshold(int_t value) {
+	_labels[(int)LabelIndex::THRESHOLD].setString("Threshold:  " + std::to_string(mnd::THRESHOLDS[value]));
+	return *this;
+}
+
 Overlay& Overlay::algorithm(int_t value) {
-	_labels[(int)LabelIndex::ALGORITHM].setString("Algorithm:  " + mnd::GetAlgorithmName(value));
+	_labels[(int)LabelIndex::ALGORITHM].setString("Algorithm:  " + std::string(mnd::ALGORITHM_NAMES[value]));
 	return *this;
 }
 
 Overlay& Overlay::color_scheme(int_t value) {
-	_labels[(int)LabelIndex::COLOR_SCHEME].setString("Color Scheme:  " + mnd::GetColorSchemeName(value));
+	_labels[(int)LabelIndex::COLOR_SCHEME].setString("Color Scheme:  " + std::string(mnd::COLOR_SCHEME_NAMES[value]));
 	return *this;
 }
 
@@ -159,6 +166,7 @@ Overlay& Overlay::state(const State& other) {
 	power(other.power);
 	magnification(other.magnification);
 	iteration(0, other.max_iterations);
+	threshold(other.threshold);
 	algorithm(other.algorithm_index);
 	color_scheme(other.color_scheme_index);
 	return *this;

@@ -15,6 +15,7 @@ int wWinMain(HINSTANCE h, HINSTANCE prev_h, PWSTR argv, int n_cmd_show)
 	{
 		int argc;
 		auto lpwstr = CommandLineToArgvW(GetCommandLine(), &argc);
+
 		for (int i = 0; i < argc; ++i) {
 			auto wstr = std::wstring(lpwstr[i]);
 			args.push_back(std::string(wstr.begin(), wstr.end()));
@@ -39,51 +40,34 @@ int main(int argc, char** argv)
 		app.GoTo(args[1]);
 
 	app.StartRenderAsync();
-
-	bool change_history;
-	bool change_overlay;
 	sf::Event event;
 
 	while (app.IsOpen()) {
-		change_history = false;
-		change_overlay = false;
-
 		while (app.PollNext(event)) {
 			switch (event.type) {
 			case sf::Event::Closed:
 				app.Close();
 				break;
 			case sf::Event::KeyPressed:
-				if (event.key.code >= sf::Keyboard::Num0 && event.key.code <= sf::Keyboard::Num9) {
-					app.StopRenderAsync();
-					app.current_state.new_power(TO_INT(event.key.code) - TO_INT(sf::Keyboard::Num0));
-					app.StartRenderAsync();
-					change_history = true;
-					change_overlay = true;
-					Application::delay_next_poll = true;
-				}
-				else {
+				if (event.key.code >= sf::Keyboard::Num0 && event.key.code <= sf::Keyboard::Num9)
+					app.ChangeOverlayAndHistory([&]() {
+						app.current_state.new_power(TO_INT(event.key.code) - TO_INT(sf::Keyboard::Num0));
+					});
+				else
 					switch (event.key.code) {
 					case sf::Keyboard::Key::Escape:
-						app.StopRenderAsync();
-						app.current_state.init_model_stack().init_magnification();
-						app.Mandelbrot();
-						app.StartRenderAsync();
-						change_history = true;
-						change_overlay = true;
-						Application::delay_next_poll = true;
+						app.ChangeOverlayAndHistory([&]() {
+							app.current_state.init_model_stack().init_magnification();
+						});
 						break;
 					case sf::Keyboard::Key::I:
 						{
 							int_t newMaximum;
 
-							if (app.EnterNewMaximum(newMaximum)) {
-								app.current_state.new_max_iterations(newMaximum);
-								app.StopRenderAsync();
-								app.StartRenderAsync();
-								change_history = true;
-								change_overlay = true;
-							}
+							if (app.EnterNewMaximum(newMaximum))
+								app.ChangeOverlayAndHistory([&]() {
+									app.current_state.new_max_iterations(newMaximum);
+								});
 						}
 
 						break;
@@ -91,22 +75,19 @@ int main(int argc, char** argv)
 						{
 							auto temp = app.current_state.j_coords;
 							
-							if (app.EnterNewCoordinates(temp)) {
-								app.StopRenderAsync();
-								app.Julia(temp);
-								app.StartRenderAsync();
-								change_history = true;
-								change_overlay = true;
-							}
+							if (app.EnterNewCoordinates(temp))
+								app.ChangeOverlayAndHistory([&]() {
+									app.Julia(temp);
+								});
 						}
 						
 						break;
 					case sf::Keyboard::Key::P:
 						app.TogglePauseRender();
+						Application::delay_next_poll = true;
 						break;
 					case sf::Keyboard::Key::R:
-						app.StopRenderAsync();
-						app.StartRenderAsync();
+						app.RestartRender();
 						break;
 					case sf::Keyboard::Key::S:
 						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) {
@@ -121,124 +102,92 @@ int main(int argc, char** argv)
 						Application::delay_next_poll = true;
 						break;
 					case sf::Keyboard::Key::PageUp:
-						app.StopRenderAsync();
-						app.current_state.next_power();
-						app.StartRenderAsync();
-						change_history = true;
-						change_overlay = true;
-						Application::delay_next_poll = true;
+						app.ChangeOverlayAndHistory([&]() {
+							app.current_state.next_power();
+						});
 						break;
 					case sf::Keyboard::Key::PageDown:
-						if (app.current_state.power > min_power()) {
-							app.StopRenderAsync();
-							app.current_state.prev_power();
-							app.StartRenderAsync();
-							change_history = true;
-							change_overlay = true;
-							Application::delay_next_poll = true;
-						}
+						if (app.current_state.power > min_power())
+							app.ChangeOverlayAndHistory([&]() {
+								app.current_state.prev_power();
+							});
 
 						break;
 					case sf::Keyboard::Key::Up:
-						app.StopRenderAsync();
-						app.current_state.prev_algorithm();
-						app.StartRenderAsync();
-						change_history = true;
-						change_overlay = true;
-						Application::delay_next_poll = true;
+						app.ChangeOverlayAndHistory([&]() {
+							app.current_state.prev_algorithm();
+						});
 						break;
 					case sf::Keyboard::Key::Down:
-						app.StopRenderAsync();
-						app.current_state.next_algorithm();
-						app.StartRenderAsync();
-						change_history = true;
-						change_overlay = true;
-						Application::delay_next_poll = true;
+						app.ChangeOverlayAndHistory([&]() {
+							app.current_state.next_algorithm();
+						});
+						break;
+					case sf::Keyboard::Key::LBracket:
+						app.ChangeOverlayAndHistory([&]() {
+							app.current_state.prev_threshold();
+						});
+						break;
+					case sf::Keyboard::Key::RBracket:
+						app.ChangeOverlayAndHistory([&]() {
+							app.current_state.next_threshold();
+						});
 						break;
 					case sf::Keyboard::Key::Left:
-						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt)) {
-							if (app.GoToPreviousState()) {
-								app.StopRenderAsync();
-
-								switch (app.current_state.type) {
-								case MANDELBROT:
-									app.Mandelbrot();
-									break;
-								case JULIA:
-									app.Julia(app.current_state.j_coords);
-									break;
-								}
-
-								app.StartRenderAsync();
-								change_overlay = true;
-								Application::delay_next_poll = true;
-							}
-						}
-						else {
-							app.StopRenderAsync();
-							app.current_state.prev_color_scheme();
-							app.StartRenderAsync();
-							change_history = true;
-							change_overlay = true;
-							Application::delay_next_poll = true;
-						}
+						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt))
+							if (app.GoToPreviousState())
+								app.ChangeOverlay([&]() {
+									switch (app.current_state.type) {
+									case mnd::MANDELBROT:
+										app.Mandelbrot();
+										break;
+									case mnd::JULIA:
+										app.Julia(app.current_state.j_coords);
+										break;
+									}
+								});
+						else
+							app.ChangeOverlayAndHistory([&]() {
+								app.current_state.prev_color_scheme();
+							});
 						
 						break;
 					case sf::Keyboard::Key::Right:
-						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt)) {
-							if (app.GoToNextState()) {
-								app.StopRenderAsync();
-
-								switch (app.current_state.type) {
-								case MANDELBROT:
-									app.Mandelbrot();
-									break;
-								case JULIA:
-									app.Julia(app.current_state.j_coords);
-									break;
-								}
-
-								app.StartRenderAsync();
-								change_overlay = true;
-								Application::delay_next_poll = true;
-							}
-						}
-						else {
-							app.StopRenderAsync();
-							app.current_state.next_color_scheme();
-							app.StartRenderAsync();
-							change_history = true;
-							change_overlay = true;
-							Application::delay_next_poll = true;
-						}
+						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt))
+							if (app.GoToNextState())
+								app.ChangeOverlay([&]() {
+									switch (app.current_state.type) {
+									case mnd::MANDELBROT:
+										app.Mandelbrot();
+										break;
+									case mnd::JULIA:
+										app.Julia(app.current_state.j_coords);
+										break;
+									}
+								});
+						else
+							app.ChangeOverlayAndHistory([&]() {
+								app.current_state.next_color_scheme();
+							});
 
 						break;
 					}
-				}
 
 				break;
 			case sf::Event::MouseButtonPressed:
 				switch (event.mouseButton.button) {
 				case sf::Mouse::Left:
-					if (MouseInView(app.canvas())) {
-						app.StopRenderAsync();
-						app.Magnify();
-						app.StartRenderAsync();
-						change_history = true;
-						change_overlay = true;
-						Application::delay_next_poll = true;
-					}
+					if (MouseInView(app.canvas()))
+						app.ChangeOverlayAndHistory([&]() {
+							app.Magnify();
+						});
 
 					break;
 				case sf::Mouse::Right:
-					if (MouseInView(app.canvas()) && app.current_state.models.size() > 1) {
-						app.StopRenderAsync();
-						app.Demagnify();
-						app.StartRenderAsync();
-						change_history = true;
-						change_overlay = true;
-						Application::delay_next_poll = true;
-					}
+					if (MouseInView(app.canvas()) && app.current_state.models.size() > 1)
+						app.ChangeOverlayAndHistory([&]() {
+							app.Demagnify();
+						});
 
 					break;
 				}
@@ -249,12 +198,6 @@ int main(int argc, char** argv)
 			if (Application::delay_next_poll)
 				app.StartPollDelayAsync();
 		}
-
-		if (change_history)
-			app.PushHistory();
-
-		if (change_overlay)
-			app.PushOverlay();
 
 		app.Update();
 		app.Clear();

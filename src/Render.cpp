@@ -14,24 +14,25 @@ Renderer::Renderer(
 	_image(image),
 	_display(display),
 	_iteration(0),
+	_threshold(mnd::THRESHOLDS[s.threshold]),
 	_max_iterations(s.max_iterations),
 	_power(s.power),
 	_j_coords(s.j_coords),
 	_plot(new pair_t[s.view.bottom * s.view.right]),
 	_fnc(mnd::FunctionByOrder(s.power)),
-	_col(mnd::ColorSchemeByIndex(s.color_scheme_index)),
-	_alg(mnd::AlgorithmByIndex(s.algorithm_index))
+	_col(mnd::COLOR_SCHEMES[s.color_scheme_index]),
+	_alg(mnd::ALGORITHMS[s.algorithm_index])
 {}
 
 void Renderer::Start() {
 	Renderer::Threads::rendering = true;
 
 	switch (_type) {
-	case MANDELBROT:
+	case mnd::MANDELBROT:
 		Interruptible::InitializePlot(_plot, _view);
 		_color_pixel_method = &Renderer::ColorMandelbrotPixel;
 		break;
-	case JULIA:
+	case mnd::JULIA:
 		Interruptible::InitializeJulia(_plot, _view, _scales);
 		_color_pixel_method = &Renderer::ColorJuliaPixel;
 		break;
@@ -41,7 +42,7 @@ void Renderer::Start() {
 	_display.get().rendering(true);
 
 	sf::Image someImage;
-	someImage.create(_view.right, _view.bottom, INIT_COLOR);
+	someImage.create(_view.right, _view.bottom, mnd::INIT_COLOR);
 
 	while (Renderer::Threads::rendering && _display.get().iteration() < _max_iterations) {
 		while (Renderer::Threads::paused);
@@ -62,9 +63,9 @@ void Renderer::Start() {
 }
 
 bool Renderer::ColorPixel(sf::Image& someImage, int_t x, int_t y, pair_t c) {
-	if (someImage.getPixel(x, y) == INIT_COLOR) {
+	if (someImage.getPixel(x, y) == mnd::INIT_COLOR) {
 		auto index = (_view.right - _view.left) * y + x;
-		auto value = _alg(_plot[index], c, _power, _iteration, _fnc);
+		auto value = _alg(_plot[index], c, _power, _iteration, _threshold, _fnc);
 
 		if (value > 0LL) {
 			someImage.setPixel(x, y, _col(value));

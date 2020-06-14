@@ -7,6 +7,7 @@
 #include "Render.h"
 #include "TextEntry.h"
 #include <chrono>
+#include <functional>
 #include <iomanip>
 #include <sstream>
 #include <time.h>
@@ -29,7 +30,7 @@ private:
 	Overlay _main_overlay;
 	TrackingBox _magnifier;
 	bool _show_overlay;
-
+	
 	sf::Image   _image;
 	sf::Sprite  _sprite;
 	sf::Texture _texture;
@@ -46,7 +47,7 @@ public:
 
 	State current_state;
 	const canvas_t& canvas() const;
-
+	
 	Application(font_t& font, int_t width_pixels, int_t height_pixels, const std::string& title);
 	Application(const Application&) = delete;
 	Application& operator=(const Application&) = delete;
@@ -59,6 +60,10 @@ public:
 	void Julia(pair_t coordinates);
 	void PushHistory();
 	void PushOverlay();
+	void ChangeState(std::function<void()>);
+	void RestartRender();
+	void ChangeOverlay(std::function<void()>);
+	void ChangeOverlayAndHistory(std::function<void()>);
 	bool GoToPreviousState();
 	bool GoToNextState();
 	void RebuildGeometry();

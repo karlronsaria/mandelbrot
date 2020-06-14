@@ -1,8 +1,6 @@
 #pragma once
-#if __cplusplus == 201703L
 #include "types.h"
 #include <assert.h>
-#endif
 #include <memory>
 
 class Scale {

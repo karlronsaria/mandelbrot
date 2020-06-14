@@ -12,6 +12,7 @@ const int_t DEFAULT_MAX_ITERATIONS = 3LL;
 const int_t DEFAULT_MAX_ITERATIONS = 100LL;
 #endif
 
+const int_t DEFAULT_THRESHOLD = 0LL;
 const int_t DEFAULT_ZOOM = 5LL;
 const pair_t INIT_PAIR = { 0.L, 0.L };
 
@@ -36,12 +37,13 @@ public:
 	int_t power;
 	int_t magnification;
 	int_t max_iterations;
+	int_t threshold;
 	int_t color_scheme_index;
 	int_t algorithm_index;
 
 	State();
 	State(int_t width_pixels, int_t height_pixels);
-	State(view_t, const model_stack_t&, int_t, pair_t, int_t, int_t, int_t, int_t, int_t);
+	State(view_t, const model_stack_t&, int_t, pair_t, int_t, int_t, int_t, int_t, int_t, int_t);
 	State(const State&) = default;
 	virtual ~State() = default;
 	State& operator=(const State&) = default;
@@ -68,6 +70,10 @@ public:
 
 	State& new_max_iterations(int_t value);
 	State& init_max_iterations();
+
+	State& init_threshold();
+	State& next_threshold();
+	State& prev_threshold();
 
 	State& new_algorithm(int_t value);
 	State& next_algorithm();
