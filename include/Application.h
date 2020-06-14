@@ -12,6 +12,7 @@
 #include <sstream>
 #include <time.h>
 
+const char* const DEFAULT_END_NOTE = "[ H for Help ]";
 constexpr int FLT_T_SIZE = sizeof(flt_t);
 const int BITS_PER_PIXEL = 32;
 const int COUPLET_SIZE = 2;
@@ -30,6 +31,7 @@ private:
 	Overlay _main_overlay;
 	TrackingBox _magnifier;
 	bool _show_overlay;
+	bool _show_help;
 	
 	sf::Image   _image;
 	sf::Sprite  _sprite;
@@ -81,6 +83,7 @@ public:
 
 	bool ToggleOverlay();
 	bool TogglePauseRender();
+	bool ToggleHelpMessage(const char* msg);
 	bool IsOpen() const;
 	void Close();
 

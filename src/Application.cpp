@@ -80,10 +80,12 @@ Application::Application(font_t& font, int_t width_pixels, int_t height_pixels, 
 	_scales(std::make_shared<Geometry2D>()),
 	_window(sf::VideoMode(width_pixels, height_pixels, BITS_PER_PIXEL), title),
 	_states(State(width_pixels, height_pixels)),
-	_main_overlay(font, _scales),
+	_main_overlay(font, _scales, _window),
 	_magnifier(_window),
-	_show_overlay(true)
+	_show_overlay(true),
+	_show_help(false)
 {
+	_main_overlay.endnote(DEFAULT_END_NOTE);
 	RebuildGeometry();
 	Threads::Add(_render_thread);
 	Threads::Add(_clock_thread);
@@ -532,6 +534,19 @@ bool Application::TogglePauseRender() {
 	}
 
 	return Renderer::Threads::paused;
+}
+
+bool Application::ToggleHelpMessage(const char* msg) {
+	_show_help = !_show_help;
+
+	if (_show_help)
+		_main_overlay
+			.notification(msg)
+			.endnote("");
+	else
+		_main_overlay
+			.notification("")
+			.endnote(DEFAULT_END_NOTE);
 }
 
 bool Application::IsOpen() const {

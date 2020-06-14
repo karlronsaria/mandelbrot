@@ -5,6 +5,32 @@
 const int_t WIDTH_PIXELS = 1200;
 const int_t HEIGHT_PIXELS = 900;
 
+const char* const HELP_MSG =
+	"\n"
+	"\nHELP"
+	"\n"
+	"\nT: Toggle Display"
+	"\nP: Pause Render"
+	"\nR : Restart Render"
+	"\nI : Change Max Iterations"
+	"\nJ : Select Julia Set"
+	"\n"
+	"\nEsc : Back to Default Magnification"
+	"\n"
+	"\nCtl + S : Save Screen Capture"
+	"\n"
+	"\nLeft Click : Zoom In"
+	"\nRight Click : Zoom Out"
+	"\n"
+	"\nAlt + Left : Go Back in History"
+	"\nAlt + Right : Go Forward in History"
+	"\n"
+	"\nPgUp - PgDn : Change Function"
+	"\nUp - Down : Change Algorithm"
+	"\nLeft - Right : Change Color Scheme"
+	"\n[ - ] : Change Threshold"
+;
+
 #if defined(WINDOWS) && !defined(_CONSOLE)
 #include <Windows.h>
 
@@ -59,6 +85,10 @@ int main(int argc, char** argv)
 						app.ChangeOverlayAndHistory([&]() {
 							app.current_state.init_model_stack().init_magnification();
 						});
+						break;
+					case sf::Keyboard::Key::H:
+						app.ToggleHelpMessage(HELP_MSG);
+						Application::delay_next_poll = true;
 						break;
 					case sf::Keyboard::Key::I:
 						{

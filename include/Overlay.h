@@ -36,6 +36,7 @@ private:
 		, COLOR_SCHEME
 		, RENDERING
 		, NOTIFICATION
+		, END_NOTE
 		, COUNT
 	};
 public:
@@ -43,7 +44,7 @@ public:
 	Overlay(const Overlay&) = default;
 	Overlay& operator=(const Overlay&) = default;
 
-	Overlay(font_t& font, geo_ptr& geo);
+	Overlay(font_t& font, geo_ptr& geo, canvas_t& window);
 	int update(canvas_t& window) override;
 
 	std::string title() const;
@@ -66,6 +67,7 @@ public:
 	Overlay& algorithm(int_t value);
 	Overlay& color_scheme(int_t value);
 	Overlay& notification(const std::string& message);
+	Overlay& endnote(const std::string& message);
 	Overlay& rendering(bool isRendering);
 	Overlay& state(const State& other);
 };

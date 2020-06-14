@@ -10,7 +10,7 @@ bool MouseInView(const canvas_t& canvas) {
 	return canvas.getViewport(canvas.getView()).contains(sf::Mouse::getPosition(canvas));
 }
 
-Overlay::Overlay(font_t& font, geo_ptr& scales) :
+Overlay::Overlay(font_t& font, geo_ptr& scales, canvas_t& window) :
 	MenuBox(font),
 	_scales(scales),
 	_iteration(0),
@@ -27,6 +27,7 @@ Overlay::Overlay(font_t& font, geo_ptr& scales) :
 	add_text_item(TO_INT(LabelIndex::COLOR_SCHEME));
 	add_text_item(INIT_X_POS, INIT_Y_POS + (TO_INT(LabelIndex::RENDERING)) * ITEM_HEIGHT + 15);
 	add_text_item(INIT_X_POS, INIT_Y_POS + (TO_INT(LabelIndex::NOTIFICATION)) * ITEM_HEIGHT + 15);
+	add_text_item(INIT_X_POS, window.getSize().y - 2 * ITEM_HEIGHT);
 
 	type(mnd::MANDELBROT, INIT_PAIR);
 	power(DEFAULT_POWER);
@@ -153,6 +154,11 @@ Overlay& Overlay::color_scheme(int_t value) {
 
 Overlay& Overlay::notification(const std::string& message) {
 	_labels[(int)LabelIndex::NOTIFICATION].setString(message);
+	return *this;
+}
+
+Overlay& Overlay::endnote(const std::string& message) {
+	_labels[(int)LabelIndex::END_NOTE].setString(message);
 	return *this;
 }
 
