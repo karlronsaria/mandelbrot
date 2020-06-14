@@ -4,21 +4,27 @@ mandelbrot.exe
 Help
 ----
 
-`T`:  Toggle Display
-`P`:  Pause Render
-`R`:  Restart Render
-`I`:  Change Max Iterations
-`J`:  Select Julia Set
+`T`:  Toggle Display <br />
+`P`:  Pause Render <br />
+`R`:  Restart Render <br />
+`I`:  Change Max Iterations <br />
+`J`:  Select Julia Set <br />
 
-`Esc`:  Back to Default Magnification
-`Ctl`+`S`:  Save Screen Capture
-`Left Click`:  Zoom In
-`Right Click`:  Zoom Out
+ <br /> <br />
+ 
+`Esc`:  Back to Default Magnification <br />
+`Ctl`+`S`:  Save Screen Capture <br />
+`Left Click`:  Zoom In <br />
+`Right Click`:  Zoom Out <br />
 
-`Alt`+`Left`:  Go Back in History
-`Alt`+`Right`:  Go Forward in History
+ <br /> <br />
+ 
+`Alt`+`Left`:  Go Back in History <br />
+`Alt`+`Right`:  Go Forward in History <br />
 
-`PgUp` &ndash; `PgDn`:  Change Function
-`Up` &ndash; `Down`:  Change Algorithm
-`Left` &ndash; `Right`:  Change Color Scheme
-`[` &ndash; `]`:  Change Threshold
+ <br /> <br />
+ 
+`PgUp` &ndash; `PgDn`:  Change Function <br />
+`Up` &ndash; `Down`:  Change Algorithm <br />
+`Left` &ndash; `Right`:  Change Color Scheme <br />
+`[` &ndash; `]`:  Change Threshold <br />
