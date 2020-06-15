@@ -57,6 +57,9 @@ void Application::PushOverlay() {
 }
 
 void Application::ChangeState(std::function<void()> action_f) {
+	if (Renderer::Threads::paused)
+		TogglePauseRender();
+
 	StopRenderAsync();
 	action_f();
 	StartRenderAsync();
@@ -287,7 +290,9 @@ bool Application::EnterNewMaximum(int_t& max) {
 
 	InputBox inputOverlay(_font);
 	std::string promptMsg = "Enter new maximum: ";
-	std::string helpMsg = "\nD for default";
+	std::string helpMsg =
+		"\nD for default"
+		"\n[Esc] to cancel";
 
 	TextEntry info;
 	int_t currentMax;
@@ -387,7 +392,10 @@ bool Application::EnterNewCoordinates(pair_t& coords) {
 	Renderer::Threads::paused = true;
 
 	InputBox inputOverlay(_font);
-	inputOverlay.set("Click on a point\n[Esc] to cancel");
+	inputOverlay.set(
+		"Click on a point"
+		"\n[Esc] to cancel"
+	);
 
 	TextEntry info;
 	sf::Event event;

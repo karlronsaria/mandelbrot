@@ -13,7 +13,7 @@ const char* const DEFAULT_TITLE = "Mandelbrot Set";
 const int_t DISPLAY_PRECISION = 3;
 
 const int_t INPUT_BOX_X = 0;
-const int_t INPUT_BOX_Y = 200;
+const int_t INPUT_BOX_Y = 245;
 const int_t INPUT_BOX_FONT_POINT = 20;
 
 class Overlay : public MenuBox {

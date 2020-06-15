@@ -6,8 +6,7 @@ const int_t WIDTH_PIXELS = 1200;
 const int_t HEIGHT_PIXELS = 900;
 
 const char* const HELP_MSG =
-	"\n"
-	"\nHELP"
+	"\n\n\n\n\n\n\nHELP"
 	"\n"
 	"\nT: Toggle Display"
 	"\nP: Pause Render"
