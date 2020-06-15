@@ -84,13 +84,10 @@ public:
 	virtual int update(canvas_t& canvas) override;
 	virtual void draw_to(target_t& canvas) override;
 	virtual void draw_to(canvas_t& canvas) override;
+	OrderedPair<int_t> get_position() const;
 	model_t get_boundaries(const Geometry2D& geo) const;
 
 	static int_t factor;
-	// static int_t box_width;
-	// static int_t box_height;
-	// static int_t box_x_radius;
-	// static int_t box_y_radius;
 };
 
 class InputBox : public MenuBox {

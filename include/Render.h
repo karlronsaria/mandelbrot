@@ -20,7 +20,7 @@ private:
 	int_t _iteration;
 	int_t _max_iterations;
 	int_t _power;
-	int_t _threshold;
+	threshold_t _threshold;
 	pair_t _j_coords;
 	plot_t _plot;
 	std::reference_wrapper<sf::Image> _image;

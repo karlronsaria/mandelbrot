@@ -12,6 +12,8 @@
 #define ARRAY_SIZE(arr) \
 sizeof(arr)/sizeof(arr[0])
 
+typedef flt_t threshold_t;
+
 namespace mnd
 {
 	const sf::Color INIT_COLOR(0, 0, 0);
@@ -28,7 +30,7 @@ namespace mnd
 
 	typedef pair_t(*complex_f)(pair_t z, pair_t c, int_t power);
 	typedef sf::Color(*color_code_f)(flt_t);
-	typedef int_t(*algorithm_f)(pair_t& z, const pair_t& c, int_t power, int_t iteration, int_t threshold, complex_f f);
+	typedef int_t(*algorithm_f)(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
 
 	const char const* const FUNCTION_NAMES[] = {
 		  "z * (sin(Re(z)), cos(Im(z))) + c"
@@ -98,17 +100,28 @@ namespace mnd
 
 	constexpr int_t NUM_COLOR_SCHEMES = ARRAY_SIZE(COLOR_SCHEMES);
 
-	int_t EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, int_t threshold, complex_f f);
-	int_t Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, int_t threshold, complex_f f);
+	int_t EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
+	int_t Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
 
-	const int_t THRESHOLDS[] = {
-		  2LL
-		, 3LL
-		, 5LL
-		, 10LL
-		, 20LL
-		, 180LL
-		, 1000LL
+	const threshold_t THRESHOLDS[] = {
+		  2.L
+		, 3.L
+		, 5.L
+		, 10.L
+		, 20.L
+		, 180.L
+		, 1000.L
+		, 100000.L
+		, 10000000.L
+		, 100000000000.L
+		, 1000000000000000.L
+		, 0.1L
+		, 0.5L
+		, 0.8L
+		, 1.L
+		, 1.1L
+		, 1.5L
+		, 1.8L
 	};
 
 	constexpr int_t NUM_THRESHOLDS = ARRAY_SIZE(THRESHOLDS);

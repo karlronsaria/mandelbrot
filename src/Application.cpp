@@ -11,6 +11,7 @@ Application::Application(font_t& font, int_t width_pixels, int_t height_pixels, 
 	_font(font),
 	_scales(std::make_shared<Geometry2D>()),
 	_window(sf::VideoMode(width_pixels, height_pixels, BITS_PER_PIXEL), title),
+	_titlebar_height(_window.getSize().y - height_pixels),
 	_states(State(width_pixels, height_pixels)),
 	_main_overlay(font, _scales, _window),
 	_magnifier(_window),
@@ -30,6 +31,10 @@ Application::~Application() {
 
 const canvas_t& Application::canvas() const {
 	return _window;
+}
+
+const Geometry2D& Application::scales() const {
+	return *_scales;
 }
 
 void Application::Mandelbrot() {
@@ -138,7 +143,7 @@ void Application::Show() {
 	_window.display();
 }
 
-pair_t Application::GetCenter() const {
+pair_t Application::GetCenterCoords() const {
 	auto left = current_state.models.top().left;
 	auto top = current_state.models.top().top;
 	return pair_t{
@@ -157,7 +162,7 @@ std::string Application::NewFileName(std::string extension) const {
 	int_t power = current_state.power;
 	int_t magnification = current_state.magnification;
 	pair_t j_coords = current_state.j_coords;
-	auto center = GetCenter();
+	auto center = GetCenterCoords();
 	std::ostringstream buf;
 
 	buf << type << '_';

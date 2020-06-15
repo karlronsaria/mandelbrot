@@ -25,6 +25,7 @@ private:
 	TrackingBox _magnifier;
 	bool _show_overlay;
 	bool _show_help;
+	int_t _titlebar_height;
 	
 	sf::Image   _image;
 	sf::Sprite  _sprite;
@@ -42,6 +43,7 @@ public:
 
 	State current_state;
 	const canvas_t& canvas() const;
+	const Geometry2D& scales() const;
 	
 	Application(font_t& font, int_t width_pixels, int_t height_pixels, const std::string& title);
 	Application(const Application&) = delete;
@@ -67,7 +69,7 @@ public:
 	void Draw();
 	void Show();
 
-	pair_t GetCenter() const;
+	pair_t GetCenterCoords() const;
 	std::string NewFileName(std::string extension = Application::DEFAULT_EXTENSION) const;
 	bool Save();
 	void GoTo(const std::string& str);

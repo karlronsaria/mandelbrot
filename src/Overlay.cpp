@@ -138,7 +138,10 @@ Overlay& Overlay::iteration(int_t it, int_t max) {
 }
 
 Overlay& Overlay::threshold(int_t value) {
-	_labels[(int)LabelIndex::THRESHOLD].setString("Threshold:  " + std::to_string(mnd::THRESHOLDS[value]));
+	std::ostringstream buf;
+	buf << std::setprecision(4)
+		<< mnd::THRESHOLDS[value];
+	_labels[(int)LabelIndex::THRESHOLD].setString("Threshold:  " + buf.str());
 	return *this;
 }
 
@@ -180,16 +183,10 @@ Overlay& Overlay::state(const State& other) {
 
 int_t TrackingBox::factor = DEFAULT_ZOOM;
 
-// int_t TrackingBox::box_width = WIDTH_PIXELS / TrackingBox::factor;
-// int_t TrackingBox::box_height = HEIGHT_PIXELS / TrackingBox::factor;
-// 
-// int_t TrackingBox::box_x_radius = TrackingBox::box_width / 2;
-// int_t TrackingBox::box_y_radius = TrackingBox::box_height / 2;
-
 TrackingBox::TrackingBox(canvas_t& canvas) :
 	_shape(sf::Vector2f{
-		static_cast<float>(canvas.getSize().x / TrackingBox::factor), // TrackingBox::box_width),
-		static_cast<float>(canvas.getSize().y / TrackingBox::factor), // TrackingBox::box_height)
+		static_cast<float>(canvas.getSize().x / TrackingBox::factor),
+		static_cast<float>(canvas.getSize().y / TrackingBox::factor)
 	})
 {
 	_shape.setPosition(sf::Mouse::getPosition(canvas).x, sf::Mouse::getPosition(canvas).y);
@@ -228,6 +225,15 @@ void TrackingBox::draw_to(target_t& canvas) {
 void TrackingBox::draw_to(canvas_t& canvas) {
 	if (MouseInView(canvas))
 		canvas.draw(_shape);
+}
+
+OrderedPair<int_t> TrackingBox::get_position() const {
+	auto size = _shape.getSize();
+	auto pos = _shape.getPosition();
+	return OrderedPair<int_t> {
+		TO_INT(pos.x + size.x / 2),
+		TO_INT(pos.y + size.y / 2)
+	};
 }
 
 model_t TrackingBox::get_boundaries(const Geometry2D& geo) const {
