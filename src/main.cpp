@@ -164,7 +164,7 @@ int main(int argc, char** argv)
 						});
 						break;
 					case sf::Keyboard::Key::Left:
-						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt))
+						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt)) {
 							if (app.GoToPreviousState())
 								app.ChangeOverlay([&]() {
 									switch (app.current_state.type) {
@@ -176,14 +176,16 @@ int main(int argc, char** argv)
 										break;
 									}
 								});
-						else
+						}
+						else {
 							app.ChangeOverlayAndHistory([&]() {
 								app.current_state.prev_color_scheme();
 							});
+						}
 						
 						break;
 					case sf::Keyboard::Key::Right:
-						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt))
+						if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt)) {
 							if (app.GoToNextState())
 								app.ChangeOverlay([&]() {
 									switch (app.current_state.type) {
@@ -195,10 +197,12 @@ int main(int argc, char** argv)
 										break;
 									}
 								});
-						else
+						}
+						else {
 							app.ChangeOverlayAndHistory([&]() {
 								app.current_state.next_color_scheme();
 							});
+						}
 
 						break;
 					}

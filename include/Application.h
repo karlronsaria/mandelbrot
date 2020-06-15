@@ -5,22 +5,15 @@
 #include "History.h"
 #include "Overlay.h"
 #include "Render.h"
+#include "Save.h"
 #include "TextEntry.h"
 #include <chrono>
 #include <functional>
-#include <iomanip>
-#include <sstream>
-#include <time.h>
 
 const char* const DEFAULT_END_NOTE = "[ H for Help ]";
-constexpr int FLT_T_SIZE = sizeof(flt_t);
 const int BITS_PER_PIXEL = 32;
-const int COUPLET_SIZE = 2;
 const int DELAY_INTERVAL_SEC = 1;
-
-std::string to_hex_str(flt_t value);
-flt_t to_float(const std::string& word);
-std::string GetDateTimeString();
+const int J_COORD_PRECISION = 4;
 
 class Application {
 private:
@@ -55,9 +48,6 @@ public:
 	Application& operator=(const Application&) = delete;
 	virtual ~Application();
 
-	pair_t GetCenter() const;
-	std::string NewFileName(std::string extension = Application::DEFAULT_EXTENSION) const;
-
 	void Mandelbrot();
 	void Julia(pair_t coordinates);
 	void PushHistory();
@@ -76,6 +66,9 @@ public:
 	void Clear();
 	void Draw();
 	void Show();
+
+	pair_t GetCenter() const;
+	std::string NewFileName(std::string extension = Application::DEFAULT_EXTENSION) const;
 	bool Save();
 	void GoTo(const std::string& str);
 	bool EnterNewMaximum(int_t& max);

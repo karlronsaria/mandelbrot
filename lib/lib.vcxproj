@@ -169,6 +169,7 @@
     <ClInclude Include="..\include\Overlay.h" />
     <ClInclude Include="..\include\OverlayNotification.h" />
     <ClInclude Include="..\include\Render.h" />
+    <ClInclude Include="..\include\Save.h" />
     <ClInclude Include="..\include\State.h" />
     <ClInclude Include="..\include\TextEntry.h" />
     <ClInclude Include="..\include\Threads.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="..\src\Overlay.cpp" />
     <ClCompile Include="..\src\OverlayNotification.cpp" />
     <ClCompile Include="..\src\Render.cpp" />
+    <ClCompile Include="..\src\Save.cpp" />
     <ClCompile Include="..\src\State.cpp" />
     <ClCompile Include="..\src\TextEntry.cpp" />
     <ClCompile Include="..\src\Threads.cpp" />

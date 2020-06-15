@@ -7,74 +7,6 @@ const char* Application::DEFAULT_EXTENSION = ".png";
 volatile std::atomic<bool> Application::delay_next_poll;
 volatile std::atomic<bool> Application::notifying;
 
-union convert_t {
-	flt_t flt;
-	unsigned char c_str[FLT_T_SIZE];
-};
-
-std::string to_hex_str(flt_t value) {
-	convert_t x;
-	x.flt = value;
-	std::stringstream buf;
-	buf.fill('0');
-
-	for (int i = 0; i < FLT_T_SIZE; ++i)
-		buf << std::setw(COUPLET_SIZE) << std::hex << (int)x.c_str[i];
-
-	return buf.str();
-}
-
-flt_t to_float(const std::string& word) {
-	convert_t u = { 0.F };
-	int i = 0, j, k = 0;
-	std::string couplet;
-
-	while (i < word.length()) {
-		couplet = "";
-		j = 0;
-
-		while (j < COUPLET_SIZE) {
-			couplet += word[i];
-			j = j + 1;
-			i = i + 1;
-		}
-
-		u.c_str[k] = std::stoi(couplet, nullptr, 16);
-		k = k + 1;
-	}
-
-	return u.flt;
-}
-
-std::string GetDateTimeString() {
-	std::time_t temp = std::time(nullptr);
-	struct tm time;
-	localtime_s(&time, &temp);
-
-	std::string mon = std::to_string(time.tm_mon + 1);
-	std::string day = std::to_string(time.tm_mday);
-	std::string hour = std::to_string(time.tm_hour);
-	std::string min = std::to_string(time.tm_min);
-	std::string sec = std::to_string(time.tm_sec);
-
-	mon = mon.length() < 2 ? "0" + mon : mon;
-	day = day.length() < 2 ? "0" + day : day;
-	hour = hour.length() < 2 ? "0" + hour : hour;
-	min = min.length() < 2 ? "0" + min : min;
-	sec = sec.length() < 2 ? "0" + sec : sec;
-
-	std::string str =
-		std::to_string(time.tm_year + 1900)
-		+ "_"
-		+ mon
-		+ "_"
-		+ day
-		+ "_"
-		+ hour + min + sec;
-
-	return str;
-}
-
 Application::Application(font_t& font, int_t width_pixels, int_t height_pixels, const std::string& title) :
 	_font(font),
 	_scales(std::make_shared<Geometry2D>()),
@@ -98,36 +30,6 @@ Application::~Application() {
 
 const canvas_t& Application::canvas() const {
 	return _window;
-}
-
-pair_t Application::GetCenter() const {
-	auto left = current_state.models.top().left;
-	auto top = current_state.models.top().top;
-	return pair_t{
-		left + abs(left - current_state.models.top().right) / 2,
-		top + abs(top - current_state.models.top().bottom) / 2
-	};
-}
-
-// Format:
-// 
-//    yyyy_MM_dd_HHmmss_-_power_magnification_iteration_x_y
-//    
-std::string Application::NewFileName(std::string extension) const {
-	int_t iteration = _main_overlay.iteration();
-	int_t power = current_state.power;
-	int_t magnification = current_state.magnification;
-	auto center = GetCenter();
-	std::ostringstream buf;
-
-	buf << std::hex << power << "_"
-		<< std::hex << magnification << "_"
-		<< std::hex << iteration << "_"
-		<< to_hex_str(center.re())
-		<< "_"
-		<< to_hex_str(center.im());
-
-	return GetDateTimeString() + "_-_" + buf.str() + extension;
 }
 
 void Application::Mandelbrot() {
@@ -167,7 +69,7 @@ void Application::ChangeOverlay(std::function<void()> action_f) {
 
 void Application::ChangeOverlayAndHistory(std::function<void()> action_f) {
 	ChangeOverlay(action_f);
-	PushOverlay();
+	PushHistory();
 }
 
 bool Application::GoToPreviousState() {
@@ -236,6 +138,49 @@ void Application::Show() {
 	_window.display();
 }
 
+pair_t Application::GetCenter() const {
+	auto left = current_state.models.top().left;
+	auto top = current_state.models.top().top;
+	return pair_t{
+		left + abs(left - current_state.models.top().right) / 2,
+		top + abs(top - current_state.models.top().bottom) / 2
+	};
+}
+
+// Format:
+// 
+//    yyyy_MM_dd_HHmmss_-_power_magnification_iteration_x_y
+//    
+std::string Application::NewFileName(std::string extension) const {
+	int_t type = current_state.type;
+	int_t iteration = _main_overlay.iteration();
+	int_t power = current_state.power;
+	int_t magnification = current_state.magnification;
+	pair_t j_coords = current_state.j_coords;
+	auto center = GetCenter();
+	std::ostringstream buf;
+
+	buf << type << '_';
+	put_int(buf, power);
+
+	buf << '_'
+		<< std::hex << magnification << '_'
+		<< std::hex << iteration << '_';
+
+	put_flt(buf, center.re());
+	buf << '_';
+	put_flt(buf, center.im());
+
+	if (type == mnd::JULIA) {
+		buf << '_';
+		put_flt(buf, j_coords.re());  // , J_COORD_PRECISION);
+		buf << '_';
+		put_flt(buf, j_coords.im());  // , J_COORD_PRECISION);
+	}
+
+	return GetDateTimeString() + "_-_" + buf.str() + extension;
+}
+
 bool Application::Save() {
 	auto temp = Renderer::Threads::paused;
 	Renderer::Threads::paused = true;
@@ -272,11 +217,14 @@ void Application::GoTo(const std::string& str) {
 	else
 		buf.ignore(1, '_');
 
-	buf << "_";
+	buf << '_';
 
 	getline(buf, temp, '_');
-	int_t power = std::stoll(temp);
+	int_t type = std::stoll(temp);
 
+	getline(buf, temp, '_');
+	int_t power = get_int(temp);
+	
 	getline(buf, temp, '_');
 	int_t magnification = std::stoll(temp);
 
@@ -284,33 +232,46 @@ void Application::GoTo(const std::string& str) {
 	int_t iteration = std::stoll(temp);
 
 	getline(buf, temp, '_');
-	flt_t x_coord = to_float(temp);
+	flt_t coord_x = get_flt(temp);
 
+	getline(buf, temp, '_');
+	flt_t coord_y = get_flt(temp);
+
+	getline(buf, temp, '_');
+	flt_t j_coord_x = get_flt(temp);
+	
 	getline(buf, temp, '.');
-	flt_t y_coord = to_float(temp);
+	flt_t j_coord_y = get_flt(temp);
 
 	current_state
+		.new_type(type)
 		.new_power(power)
 		.init_magnification()
 		.init_max_iterations();
+
+	if (type == mnd::JULIA)
+		current_state
+			.new_j_coords(pair_t{ j_coord_x, j_coord_y });
 
 	RebuildGeometry();
 
 	while (magnification < current_state.magnification) {
 		_magnifier.move(
-			_scales->horz().to_pixel(x_coord),
-			_scales->vert().to_pixel(y_coord)
+			_scales->horz().to_pixel(coord_x),
+			_scales->vert().to_pixel(coord_y)
 		);
 		Demagnify();
 	}
 
 	while (magnification > current_state.magnification) {
 		_magnifier.move(
-			_scales->horz().to_pixel(x_coord),
-			_scales->vert().to_pixel(y_coord)
+			_scales->horz().to_pixel(coord_x),
+			_scales->vert().to_pixel(coord_y)
 		);
 		Magnify();
 	}
+
+	_main_overlay.state(current_state);
 }
 
 bool Application::EnterNewMaximum(int_t& max) {
@@ -547,6 +508,8 @@ bool Application::ToggleHelpMessage(const char* msg) {
 		_main_overlay
 			.notification("")
 			.endnote(DEFAULT_END_NOTE);
+
+	return _show_help;
 }
 
 bool Application::IsOpen() const {
