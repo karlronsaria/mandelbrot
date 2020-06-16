@@ -8,11 +8,12 @@ const int_t HEIGHT_PIXELS = 900;
 const char* const HELP_MSG =
 	"\n\n\n\n\n\n\nHELP"
 	"\n"
-	"\nT: Toggle Display"
-	"\nP: Pause Render"
+	"\nT : Toggle Display"
+	"\nP : Pause Render"
 	"\nR : Restart Render"
 	"\nI : Change Max Iterations"
 	"\nJ : Select Julia Set"
+	"\nM : Back to Mandelbrot Set"
 	"\n"
 	"\nEsc : Back to Default Magnification"
 	"\n"
@@ -73,6 +74,10 @@ int main(int argc, char** argv)
 			case sf::Event::Closed:
 				app.Close();
 				break;
+			case sf::Event::Resized:
+				app.RebuildGeometry();
+				app.RebuildMagnifier();
+				break;
 			case sf::Event::KeyPressed:
 				if (event.key.code >= sf::Keyboard::Num0 && event.key.code <= sf::Keyboard::Num9)
 					app.ChangeOverlayAndHistory([&]() {
@@ -109,7 +114,14 @@ int main(int argc, char** argv)
 									app.Julia(temp);
 								});
 						}
-						
+
+						break;
+					case sf::Keyboard::Key::M:
+						if (app.current_state.type != mnd::MANDELBROT)
+							app.ChangeOverlayAndHistory([&]() {
+								app.Mandelbrot();
+							});
+
 						break;
 					case sf::Keyboard::Key::P:
 						app.TogglePauseRender();

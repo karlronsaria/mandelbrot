@@ -67,7 +67,7 @@ bool Renderer::ColorPixel(sf::Image& someImage, int_t x, int_t y, pair_t c) {
 		auto index = (_view.right - _view.left) * y + x;
 		auto value = _alg(_plot[index], c, _power, _iteration, _threshold, _fnc);
 
-		if (value > 0LL) {
+		if (value >= 0LL) {
 			someImage.setPixel(x, y, _col(value));
 			return true;
 		}

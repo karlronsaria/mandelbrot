@@ -12,6 +12,8 @@
 #define ARRAY_SIZE(arr) \
 sizeof(arr)/sizeof(arr[0])
 
+#define LOG(value) log(value)
+
 typedef flt_t threshold_t;
 
 namespace mnd
@@ -94,7 +96,7 @@ namespace mnd
 	const color_code_f COLOR_SCHEMES[] = {
 		  [](flt_t v) { return HsvToColor(v + INIT_HUE, 1.f, 1.f); }
 		, [](flt_t v) { return HsvToColor(MAX_HUE / v + INIT_HUE, 1.f - 1.f / v, 1.f); }
-		, [](flt_t v) { return HsvToColor(10 * log(v) + INIT_HUE, 1.f, 1.f); }
+		, [](flt_t v) { return HsvToColor(10 * LOG(v) + INIT_HUE, 1.f, 1.f); }
 		, [](flt_t v) { return HsvToColor(100 * sin(v) + INIT_HUE, 1.f, 1.f); }
 	};
 

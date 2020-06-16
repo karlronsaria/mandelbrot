@@ -114,9 +114,7 @@ int_t mnd::Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, t
 	auto temp = sqr_sum(z);
 
 	if (temp > threshold * threshold)
-		return POTENTIAL_BIAS * pow(2, iteration) / log(temp);
-		// return ESCAPE_BIAS * pow(2, iteration) / log(temp);
-		// return pow(2, iteration) / log(temp);
+		return POTENTIAL_BIAS * pow(2.L, iteration % 52) / LOG(temp);
 
 	return -1LL;
 }

@@ -102,6 +102,10 @@ void Application::RebuildGeometry() {
 	*_scales = Geometry2D(current_state.view, current_state.models.top());
 }
 
+void Application::RebuildMagnifier() {
+	_magnifier = TrackingBox(_window);
+}
+
 bool Application::PollNext(sf::Event& e) {
 	return !Application::delay_next_poll && _window.pollEvent(e);
 }
@@ -181,9 +185,9 @@ std::string Application::NewFileName(std::string extension) const {
 
 	if (type == mnd::JULIA) {
 		buf << '_';
-		put_flt(buf, j_coords.re());  // , J_COORD_PRECISION);
+		put_flt(buf, j_coords.re());
 		buf << '_';
-		put_flt(buf, j_coords.im());  // , J_COORD_PRECISION);
+		put_flt(buf, j_coords.im());
 	}
 
 	return GetDateTimeString() + "_-_" + buf.str() + extension;

@@ -201,16 +201,16 @@ void TrackingBox::move(int_t x, int_t y) {
 }
 
 int TrackingBox::update(canvas_t& canvas) {
-	auto mouse = sf::Mouse::getPosition(canvas);
-	mouse = (sf::Vector2i)canvas.mapPixelToCoords(mouse);
+	auto mouse = canvas.mapPixelToCoords(sf::Mouse::getPosition(canvas));
 	auto size = _shape.getSize();
-
+	auto canvasSize = canvas.getSize();
+	
 	_shape.setPosition(
-		mouse.x - size.x / 2 >= 0 && mouse.x + size.x / 2 <= canvas.getSize().x
+		mouse.x - size.x / 2 >= 0 && mouse.x + size.x / 2 <= canvasSize.x
 		? mouse.x - size.x / 2
 		: _shape.getPosition().x,
-
-		mouse.y - size.y / 2 >= 0 && mouse.y + size.y / 2 <= canvas.getSize().y
+	
+		mouse.y - size.y / 2 >= 0 && mouse.y + size.y / 2 <= canvasSize.y
 		? mouse.y - size.y / 2
 		: _shape.getPosition().y
 	);

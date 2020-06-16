@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-/**
+/*
  * Determination a platform of an operation system
  * Fully supported supported only GNU GCC/G++, partially on Clang/LLVM
  */
@@ -62,32 +62,3 @@
 const char* get_platform_name() {
     return PLATFORM_NAME == NULL ? "" : PLATFORM_NAME;
 }
-
-// #if defined(WINDOWS) && !defined(_CONSOLE)
-// #include <Windows.h>
-// #define __WINAPP
-// #define MAIN_ENTRY \
-// int wWinMain(HINSTANCE h, HINSTANCE prev_h, PWSTR argv, int n_cmd_show)
-// #else
-// #define MAIN_ENTRY \
-// int main(int argc, char** argv)
-// #endif
-
-// #ifdef __WINAPP
-// #define COMMAND_LINE_ARGUMENTS(args) \
-// 	{ \
-// 		int argc; \
-// 		auto lpwstr = CommandLineToArgvW(GetCommandLine(), &argc); \
-// 		for (int i = 0; i < argc; ++i) { \
-// 			auto wstr = std::wstring(lpwstr[i]); \
-// 			args.push_back(std::string(wstr.begin(), wstr.end())); \
-// 		} \
-// 	}
-// #else
-// #define COMMAND_LINE_ARGUMENTS(args) \
-// 	{ \
-// 		for (int i = 0; i < argc; ++i) { \
-// 			args.push_back(std::string(argv[i])); \
-// 		} \
-// 	}
-// #endif

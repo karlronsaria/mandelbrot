@@ -7,7 +7,6 @@
 
 constexpr int FLT_T_SIZE = sizeof(flt_t);
 const int COUPLET_SIZE = 2;
-// const int J_COORD_PRECISION = 4;
 
 std::string to_hex_str(flt_t value, int_t size = FLT_T_SIZE);
 flt_t to_float(const std::string& word);

@@ -16,57 +16,54 @@ flt_t Scale::GetCoordToPixelFactor(int_t minPixel, int_t maxPixel, flt_t minCoor
 }
 
 /*
-
-Model length:  M = y - x
-View length:   V = b - a
-
-Model segment: W = w - x
-View segment:  C = c - a
-
-Note
-
-	M is congruent to V
-
-Then
-
-	C/W = V/M
-	(c - a)/(w - x) = (b - a)/(y - x)
-
-Let
-
-	f = (b - a)/(y - x)
-
-Then
-
-	(c - a)/(w - x) = f
-	c - a = (w - x)f
-	c = (w - x)f + a
-
-Thus
-
-	coord_to_pixel = (max_pixel - min_pixel)/(max_coord - min_coord)
-	pixel = (coord - min_coord)(coord_to_pixel) + min_pixel
-
+	Model length:  M = y - x
+	View length:   V = b - a
+	
+	Model segment: W = w - x
+	View segment:  C = c - a
+	
+	Note
+	
+		M is congruent to V
+	
+	Then
+	
+		C/W = V/M
+		(c - a)/(w - x) = (b - a)/(y - x)
+	
+	Let
+	
+		f = (b - a)/(y - x)
+	
+	Then
+	
+		(c - a)/(w - x) = f
+		c - a = (w - x)f
+		c = (w - x)f + a
+	
+	Thus
+	
+		coord_to_pixel = (max_pixel - min_pixel)/(max_coord - min_coord)
+		pixel = (coord - min_coord)(coord_to_pixel) + min_pixel
 */
 int_t Scale::to_pixel(flt_t coord) const {
 	return TO_INT((coord - _min_coord) * _coord_to_pixel) + _min_pixel;
 }
 
 /*
-Recall
-
-	(c - a)/(w - x) = f
-
-Then
-
-	(w - x)/(c - a) = 1/f
-	w - x = (c - a)(1/f)
-	w = (c - a)(1/f) + x
-
-Thus
-
-	coord = (pixel - min_pixel)(1/coord_to_pixel) + min_coord
-
+	Recall
+	
+		(c - a)/(w - x) = f
+	
+	Then
+	
+		(w - x)/(c - a) = 1/f
+		w - x = (c - a)(1/f)
+		w = (c - a)(1/f) + x
+	
+	Thus
+	
+		coord = (pixel - min_pixel)(1/coord_to_pixel) + min_coord
 */
 flt_t Scale::to_coord(int_t pixel) const {
 	return ((pixel - _min_pixel) / _coord_to_pixel) + _min_coord;

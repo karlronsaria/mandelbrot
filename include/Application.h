@@ -61,6 +61,7 @@ public:
 	bool GoToPreviousState();
 	bool GoToNextState();
 	void RebuildGeometry();
+	void RebuildMagnifier();
 	bool PollNext(sf::Event& e);
 	void Magnify();
 	void Demagnify();

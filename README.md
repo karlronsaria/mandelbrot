@@ -12,6 +12,7 @@ Help
 `R`:  Restart Render <br />
 `I`:  Change Max Iterations <br />
 `J`:  Select Julia Set <br />
+`M`:  Back to Mandelbrot Set <br />
 <br />
 `Esc`:  Back to Default Magnification <br />
 `Ctl`+`S`:  Save Screen Capture <br />
