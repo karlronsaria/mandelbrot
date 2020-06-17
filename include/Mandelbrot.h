@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifdef DEBUG
 #include "/devlib/cpp/og/include/Debug.h"
 #endif
@@ -34,14 +34,20 @@ namespace mnd
 	typedef sf::Color(*color_code_f)(flt_t);
 	typedef int_t(*algorithm_f)(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
 
-	const char const* const FUNCTION_NAMES[] = {
-		  "z * (sin(Re(z)), cos(Im(z))) + c"
-		, "exp(z) + c"
-		, "sin(z) + c"
-		, "z * sin(z) + c"
-		, "tan(z) + c"
-		, "Collatz Map"
-		, "Collatz Map 2"
+	const wchar_t const* const FUNCTION_NAMES[] = {
+		  L"z^|z| + c"
+		, L"exp(z) + c"
+		, L"sin(z) + c"
+		, L"z * sin(z) + c"
+		, L"z * cos(sin(z)) + c"
+		, L"tan(z) + c"
+		, L"Collatz Map"
+		, L"Collatz Map 2"
+		, L"∑( z^(2i + 1), for i in [0, 7] ) + c"
+		, L"z * (cos(Re(z)), sin(Im(z))) + c"
+		, L"z * (sin(Re(z)), cos(Im(z))) + c"
+		, L"exp(floor(z)) + c"
+		, L"exp(iz) + c"
 	};
 
 	const complex_f FUNCTIONS[] = {
@@ -49,7 +55,7 @@ namespace mnd
 			  return c + fpow(z, power);
 		  }
 		, NEW_COMPLEX_F(z, c, power) {
-			  return c + z * pair_t(sin(z.re()), cos(z.im()));
+			  return c + fpow(z, abs(z));
 		  }
 		, NEW_COMPLEX_F(z, c, power) {
 			  return c + exp(z);
@@ -59,6 +65,9 @@ namespace mnd
 		  }
 		, NEW_COMPLEX_F(z, c, power) {
 			  return c + z * sin(z);
+		  }
+		, NEW_COMPLEX_F(z, c, power) {
+			  return c + z * cos(sin(z));
 		  }
 		, NEW_COMPLEX_F(z, c, power) {
 			  return c + sin(z) / cos(z);
@@ -75,6 +84,25 @@ namespace mnd
 				  + (cos(z * PI) + 1.L) * (z * 3.L + 1.L) * (1 / 16.L)
 				  * (cos((z * 2.L - 1.L) * (PI / 4.L)) * (-sqrt(2.L)) + 3.L)
 			  );
+		  }
+		, NEW_COMPLEX_F(z, c, power) {
+			  for (int i = 0; i < 7; ++i)
+			  	  c += fpow(z, 2.L * i + 1);
+
+			  return c;
+		  }
+		, NEW_COMPLEX_F(z, c, power) {
+			  return c + z * pair_t(cos(z.re()), sin(z.im()));
+		  }
+		, NEW_COMPLEX_F(z, c, power) {
+			  return c + z * pair_t(sin(z.re()), cos(z.im()));
+		  }
+		, NEW_COMPLEX_F(z, c, power) {
+			  z = exp(z);
+			  return c + pair_t{ floor(z.re()), floor(z.im()) };
+		  }
+		, NEW_COMPLEX_F(z, c, power) {
+			  return c + cis(z);
 		  }
 	};
 
@@ -104,6 +132,7 @@ namespace mnd
 
 	int_t EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
 	int_t Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
+	int_t Dichromatic(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f);
 
 	const threshold_t THRESHOLDS[] = {
 		  2.L
@@ -131,11 +160,13 @@ namespace mnd
 	const char const* const ALGORITHM_NAMES[] = {
 		  "Escape Time"
 		, "Potential"
+		, "Dichromatic"
 	};
 
 	const algorithm_f ALGORITHMS[] = {
 		  EscapeTime
 		, Potential
+		, Dichromatic
 	};
 
 	constexpr int_t NUM_ALGORITHMS = ARRAY_SIZE(ALGORITHMS);

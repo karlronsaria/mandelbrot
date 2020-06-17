@@ -40,12 +40,15 @@ private:
 		, COUNT
 	};
 public:
+	static const LabelIndex STATIC_ITEMS[];
+
 	Overlay() = delete;
 	Overlay(const Overlay&) = default;
 	Overlay& operator=(const Overlay&) = default;
 
 	Overlay(font_t& font, geo_ptr& geo, canvas_t& window);
 	int update(canvas_t& window) override;
+	void draw_static_to(target_t& window);
 
 	std::string title() const;
 	int_t iteration() const;
@@ -68,7 +71,7 @@ public:
 	Overlay& color_scheme(int_t value);
 	Overlay& notification(const std::string& message);
 	Overlay& endnote(const std::string& message);
-	Overlay& rendering(bool isRendering);
+	Overlay& rendering_msg(const std::string& message);
 	Overlay& state(const State& other);
 };
 

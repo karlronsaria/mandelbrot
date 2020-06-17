@@ -24,7 +24,7 @@ Renderer::Renderer(
 	_alg(mnd::ALGORITHMS[s.algorithm_index])
 {}
 
-void Renderer::Start() {
+sf::Image Renderer::Start() {
 	Renderer::Threads::rendering = true;
 
 	switch (_type) {
@@ -39,27 +39,41 @@ void Renderer::Start() {
 	}
 
 	_display.get().init_iteration();
-	_display.get().rendering(true);
 
 	sf::Image someImage;
 	someImage.create(_view.right, _view.bottom, mnd::INIT_COLOR);
+	return someImage;
+}
 
-	while (Renderer::Threads::rendering && _display.get().iteration() < _max_iterations) {
-		while (Renderer::Threads::paused);
+bool Renderer::HasNext() {
+	return Renderer::Threads::rendering&& _display.get().iteration() < _max_iterations;
+}
 
-		if (RenderFrame(someImage) > 0)
-			_image.get() = someImage;
-
-		_iteration = _display.get().next_iteration();
-	}
-
-	_display.get().rendering(false);
+void Renderer::Close() {
 	Renderer::Threads::rendering = false;
 
 	if (_plot != nullptr) {
 		delete[] _plot;
 		_plot = nullptr;
 	}
+}
+
+void Renderer::Next(sf::Image& someImage) {
+	while (Renderer::Threads::paused);
+
+	if (RenderFrame(someImage) > 0)
+		_image.get() = someImage;
+
+	_iteration = _display.get().next_iteration();
+}
+
+void Renderer::Run() {
+	auto someImage = Start();
+
+	while (HasNext())
+		Next(someImage);
+
+	Close();
 }
 
 bool Renderer::ColorPixel(sf::Image& someImage, int_t x, int_t y, pair_t c) {

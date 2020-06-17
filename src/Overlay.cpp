@@ -46,6 +46,23 @@ int Overlay::update(canvas_t& window) {
 	return (int)UpdateCodes::IDLE;
 }
 
+const Overlay::LabelIndex Overlay::STATIC_ITEMS[] = {
+	  LabelIndex::TITLE
+	, LabelIndex::MOUSE_X
+	, LabelIndex::MOUSE_Y
+	, LabelIndex::POWER
+	, LabelIndex::MAGNIFICATION
+	, LabelIndex::ITERATION
+	, LabelIndex::THRESHOLD
+	, LabelIndex::ALGORITHM
+	, LabelIndex::COLOR_SCHEME
+};
+
+void Overlay::draw_static_to(target_t& window) {
+	for (auto item : STATIC_ITEMS)
+		window.draw(_labels[static_cast<int>(item)]);
+}
+
 std::string Overlay::title() const {
 	return _labels[(int)LabelIndex::TITLE].getString();
 }
@@ -165,8 +182,8 @@ Overlay& Overlay::endnote(const std::string& message) {
 	return *this;
 }
 
-Overlay& Overlay::rendering(bool isRendering) {
-	_labels[(int)LabelIndex::RENDERING].setString(isRendering ? "Rendering..." : "");
+Overlay& Overlay::rendering_msg(const std::string& message) {
+	_labels[(int)LabelIndex::RENDERING].setString(message);
 	return *this;
 }
 

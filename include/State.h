@@ -7,7 +7,7 @@ const int_t DEFAULT_POWER = 2LL;
 const int_t DEFAULT_MAGNIFICATION = 0LL;
 
 #ifdef DEBUG
-const int_t DEFAULT_MAX_ITERATIONS = 3LL;
+const int_t DEFAULT_MAX_ITERATIONS = 15LL;
 #else
 const int_t DEFAULT_MAX_ITERATIONS = 100LL;
 #endif

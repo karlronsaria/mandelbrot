@@ -118,3 +118,12 @@ int_t mnd::Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, t
 
 	return -1LL;
 }
+
+int_t mnd::Dichromatic(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f) {
+	z = f(z, c, power);
+
+	if (sqr_sum(z) > threshold * threshold)
+		return POTENTIAL_BIAS * (iteration % 2);
+
+	return -1LL;
+}

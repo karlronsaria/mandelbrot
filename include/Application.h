@@ -11,7 +11,6 @@
 #include <functional>
 
 const char* const DEFAULT_END_NOTE = "[ H for Help ]";
-const int BITS_PER_PIXEL = 32;
 const int DELAY_INTERVAL_SEC = 1;
 const int J_COORD_PRECISION = 4;
 
@@ -27,8 +26,8 @@ private:
 	bool _show_help;
 	int_t _titlebar_height;
 	
-	sf::Image   _image;
-	sf::Sprite  _sprite;
+	sf::Image _image;
+	sf::Sprite _sprite;
 	sf::Texture _texture;
 
 	std::thread _render_thread;
@@ -44,6 +43,7 @@ public:
 	State current_state;
 	const canvas_t& canvas() const;
 	const Geometry2D& scales() const;
+	const sf::Image& image() const;
 	
 	Application(font_t& font, int_t width_pixels, int_t height_pixels, const std::string& title);
 	Application(const Application&) = delete;
@@ -72,6 +72,8 @@ public:
 
 	pair_t GetCenterCoords() const;
 	std::string NewFileName(std::string extension = Application::DEFAULT_EXTENSION) const;
+	bool Save(sf::Sprite& someSprite, const sf::Image& someImage);
+	bool Save(sf::Sprite& someSprite);
 	bool Save();
 	void GoTo(const std::string& str);
 	bool EnterNewMaximum(int_t& max);
@@ -84,6 +86,7 @@ public:
 	void Close();
 
 	void StartRenderAsync();
+	void StartRecordingRenderAsync();
 	void StopRenderAsync();
 	void StartTimedMessageAsync(const std::string& message, int_t seconds = Application::MSG_DURATION_SEC);
 	void StartPollDelayAsync();

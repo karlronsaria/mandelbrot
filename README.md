@@ -15,7 +15,10 @@ Help
 `M`:  Back to Mandelbrot Set <br />
 <br />
 `Esc`:  Back to Default Magnification <br />
+<br />
 `Ctl`+`S`:  Save Screen Capture <br />
+`V`:  Start a Recorded Render <br />
+<br />
 `Left Click`:  Zoom In <br />
 `Right Click`:  Zoom Out <br />
 <br />

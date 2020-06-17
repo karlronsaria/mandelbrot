@@ -10,7 +10,14 @@ volatile std::atomic<bool> Application::notifying;
 Application::Application(font_t& font, int_t width_pixels, int_t height_pixels, const std::string& title) :
 	_font(font),
 	_scales(std::make_shared<Geometry2D>()),
-	_window(sf::VideoMode(width_pixels, height_pixels, BITS_PER_PIXEL), title),
+	_window(
+		sf::VideoMode(
+			width_pixels, 
+			height_pixels, 
+			sf::VideoMode::getDesktopMode().bitsPerPixel
+		), 
+		title
+	),
 	_titlebar_height(_window.getSize().y - height_pixels),
 	_states(State(width_pixels, height_pixels)),
 	_main_overlay(font, _scales, _window),
@@ -35,6 +42,10 @@ const canvas_t& Application::canvas() const {
 
 const Geometry2D& Application::scales() const {
 	return *_scales;
+}
+
+const sf::Image& Application::image() const {
+	return _image;
 }
 
 void Application::Mandelbrot() {
@@ -175,9 +186,14 @@ std::string Application::NewFileName(std::string extension) const {
 	buf << type << '_';
 	put_int(buf, power);
 
+	auto fill = buf.fill();
+
 	buf << '_'
 		<< std::hex << magnification << '_'
-		<< std::hex << iteration << '_';
+		<< std::setfill('0')
+		<< std::setw(std::to_string(current_state.max_iterations).length())
+		<< std::dec << iteration << '_'
+		<< std::setfill(fill);
 
 	put_flt(buf, center.re());
 	buf << '_';
@@ -193,29 +209,41 @@ std::string Application::NewFileName(std::string extension) const {
 	return GetDateTimeString() + "_-_" + buf.str() + extension;
 }
 
-bool Application::Save() {
-	auto temp = Renderer::Threads::paused;
-	Renderer::Threads::paused = true;
-	sf::RenderTexture myTexture;
+bool Application::Save(sf::Sprite& someSprite, const sf::Image& someImage) {
+	sf::Texture someTexture;
+	someTexture.loadFromImage(someImage);
+	someSprite.setTexture(someTexture);
+	return Save(someSprite);
+}
 
-	if (!myTexture.create(current_state.view.right, current_state.view.bottom)) {
-		Renderer::Threads::paused = temp;
+bool Application::Save(sf::Sprite& someSprite) {
+	sf::RenderTexture target;
+	target.setActive(true);
+
+	if (!target.create(current_state.view.right, current_state.view.bottom))
 		return false;
-	}
 
-	myTexture.display();
-	myTexture.draw(_sprite);
-
+	target.display();
+	target.draw(someSprite);
+	
 	if (_show_overlay)
-		_main_overlay.draw_to(myTexture);
+		_main_overlay.draw_static_to(target);
 
-	myTexture
+	target
 		.getTexture()
 		.copyToImage()
 		.saveToFile(NewFileName());
 
-	Renderer::Threads::paused = temp;
+	target.setActive(false);
 	return true;
+}
+
+bool Application::Save() {
+	auto temp = Renderer::Threads::paused;
+	Renderer::Threads::paused = true;
+	auto success = Save(_sprite);
+	Renderer::Threads::paused = temp;
+	return success;
 }
 
 void Application::GoTo(const std::string& str) {
@@ -449,18 +477,41 @@ bool Application::EnterNewCoordinates(pair_t& coords) {
 }
 
 void Application::StartRenderAsync() {
+	_main_overlay.rendering_msg("Rendering...");
 	_image.create(current_state.view.right, current_state.view.bottom, mnd::INIT_COLOR);
-	Renderer::Threads::rendering = true;
 	_render_thread = std::thread(
 		[i = std::ref(_image), o = std::ref(_main_overlay), s = current_state]() {
 			Renderer r(i, o, s);
-			r.Start();
+			r.Run();
+			o.get().rendering_msg("");
+		}
+	);
+}
+
+void Application::StartRecordingRenderAsync() {
+	_main_overlay.rendering_msg("Recording...");
+	_image.create(current_state.view.right, current_state.view.bottom, mnd::INIT_COLOR);
+	_render_thread = std::thread(
+		[&, i = std::ref(_image), o = std::ref(_main_overlay), s = current_state]() {
+			Renderer r(i, o, s);
+
+			sf::Sprite someSprite;
+			auto someImage = r.Start();
+
+			while (r.HasNext()) {
+				r.Next(someImage);
+				Save(someSprite, i.get());
+			}
+
+			r.Close();
+			o.get().rendering_msg("");
 		}
 	);
 }
 
 void Application::StopRenderAsync() {
 	Renderer::Threads::rendering = false;
+	_main_overlay.rendering_msg("");
 
 	if (_render_thread.joinable())
 		_render_thread.join();

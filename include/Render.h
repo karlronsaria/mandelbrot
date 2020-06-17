@@ -40,7 +40,11 @@ public:
 		const State&
 	);
 
-	void Start();
+	sf::Image Start();
+	bool HasNext();
+	void Next(sf::Image& someImage);
+	void Close();
+	void Run();
 
 	class Interruptible {
 	public:

@@ -18,6 +18,7 @@ const char* const HELP_MSG =
 	"\nEsc : Back to Default Magnification"
 	"\n"
 	"\nCtl + S : Save Screen Capture"
+	"\nV : Start a Recorded Render"
 	"\n"
 	"\nLeft Click : Zoom In"
 	"\nRight Click : Zoom Out"
@@ -140,6 +141,14 @@ int main(int argc, char** argv)
 						break;
 					case sf::Keyboard::Key::T:
 						app.ToggleOverlay();
+						Application::delay_next_poll = true;
+						break;
+					case sf::Keyboard::Key::V:
+						if (Renderer::Threads::paused)
+							app.TogglePauseRender();
+
+						app.StopRenderAsync();
+						app.StartRecordingRenderAsync();
 						Application::delay_next_poll = true;
 						break;
 					case sf::Keyboard::Key::PageUp:

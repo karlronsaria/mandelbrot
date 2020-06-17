@@ -41,6 +41,8 @@ public:
 	const Complex operator-(const T& scalar) const;
 	const Complex operator*(const T& scalar) const;
 	const Complex operator/(const T& scalar) const;
+
+	static const Complex Im;
 };
 
 typedef Complex<flt_t> pair_t;
@@ -50,15 +52,21 @@ Complex<T> conj(const Complex<T>& complex) {
 	return Complex<T>(complex.re(), -complex.im());
 }
 
-pair_t cos(const pair_t& complex);
-pair_t sin(const pair_t& complex);
-pair_t exp(const pair_t& complex);
-pair_t log(const pair_t& complex);
-flt_t abs(const pair_t& complex);
-flt_t phase(const pair_t& complex);
-pair_t pow(const pair_t& complex, int_t power);
-pair_t fpow(const pair_t& complex, flt_t power);
-flt_t sqr_sum(const pair_t& complex);
+pair_t cos(const pair_t& z);
+pair_t sin(const pair_t& z);
+pair_t cosh(const pair_t& z);
+pair_t sinh(const pair_t& z);
+pair_t cis(flt_t a);
+pair_t cis(const pair_t& z);
+pair_t exp(const pair_t& z);
+pair_t log(const pair_t& z);
+flt_t abs(const pair_t& z);
+flt_t phase(const pair_t& z);
+pair_t pow(const pair_t& z, int_t a);
+pair_t pow(flt_t a, const pair_t& z);
+pair_t pow(const pair_t& z, const pair_t& w);
+pair_t fpow(const pair_t& z, flt_t w);
+flt_t sqr_sum(const pair_t& z);
 
 template <typename T>
 Complex<T>::Complex() :
