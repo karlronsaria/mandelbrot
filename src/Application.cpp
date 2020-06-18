@@ -250,14 +250,12 @@ void Application::GoTo(const std::string& str) {
 	std::stringstream buf(str);
 	std::string temp;
 
-	buf.ignore(50, '-');
-
-	if (buf.eof())
+	buf.ignore(std::numeric_limits<std::streamsize>::max(), '-');
+	
+	if (!buf || buf.eof())
 		buf = std::stringstream(str);
 	else
 		buf.ignore(1, '_');
-
-	buf << '_';
 
 	getline(buf, temp, '_');
 	int_t type = std::stoll(temp);
@@ -274,14 +272,8 @@ void Application::GoTo(const std::string& str) {
 	getline(buf, temp, '_');
 	flt_t coord_x = get_flt(temp);
 
-	getline(buf, temp, '_');
+	getline(buf, temp, type == mnd::JULIA ? '_' : '.');
 	flt_t coord_y = get_flt(temp);
-
-	getline(buf, temp, '_');
-	flt_t j_coord_x = get_flt(temp);
-	
-	getline(buf, temp, '.');
-	flt_t j_coord_y = get_flt(temp);
 
 	current_state
 		.new_type(type)
@@ -289,9 +281,16 @@ void Application::GoTo(const std::string& str) {
 		.init_magnification()
 		.init_max_iterations();
 
-	if (type == mnd::JULIA)
+	if (type == mnd::JULIA) {
+		getline(buf, temp, '_');
+		flt_t j_coord_x = get_flt(temp);
+
+		getline(buf, temp, '.');
+		flt_t j_coord_y = get_flt(temp);
+
 		current_state
 			.new_j_coords(pair_t{ j_coord_x, j_coord_y });
+	}
 
 	RebuildGeometry();
 

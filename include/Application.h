@@ -9,6 +9,7 @@
 #include "TextEntry.h"
 #include <chrono>
 #include <functional>
+#include <limits>
 
 const char* const DEFAULT_END_NOTE = "[ H for Help ]";
 const int DELAY_INTERVAL_SEC = 1;
