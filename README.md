@@ -6,7 +6,6 @@ This package depends on `sfml`.
 - [Help](#help)
 - [Saving Screen Captures](#saving-screen-captures)
   - [File Name Parts](#file-name-parts)
-  - [Example](#example)
 - [Command-line Arguments](#command-line-arguments)
   - [Syntax](#syntax)
   - [Examples](#examples)
