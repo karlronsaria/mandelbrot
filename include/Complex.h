@@ -54,19 +54,28 @@ Complex<T> conj(const Complex<T>& complex) {
 
 pair_t cos(const pair_t& z);
 pair_t sin(const pair_t& z);
+pair_t tan(const pair_t& z);
+pair_t acos(const pair_t& z);
+pair_t asin(const pair_t& z);
+pair_t atan(const pair_t& z);
 pair_t cosh(const pair_t& z);
 pair_t sinh(const pair_t& z);
+pair_t tanh(const pair_t& z);
+pair_t acosh(const pair_t& z);
+pair_t asinh(const pair_t& z);
+pair_t atanh(const pair_t& z);
 pair_t cis(flt_t a);
 pair_t cis(const pair_t& z);
 pair_t exp(const pair_t& z);
 pair_t log(const pair_t& z);
 flt_t abs(const pair_t& z);
-flt_t phase(const pair_t& z);
+flt_t arg(const pair_t& z);
 pair_t pow(const pair_t& z, int_t a);
 pair_t pow(flt_t a, const pair_t& z);
 pair_t pow(const pair_t& z, const pair_t& w);
 pair_t fpow(const pair_t& z, flt_t w);
 flt_t sqr_sum(const pair_t& z);
+pair_t sqrt(const pair_t& z);
 
 template <typename T>
 Complex<T>::Complex() :

@@ -14,8 +14,8 @@ namespace ComplexType
 	public:
 		TEST_METHOD(Phase)
 		{
-			Assert::AreEqual(1.1943059923483736f, phase(a), DELTA, L"Complex phase");
-			auto temp = phase(a);
+			Assert::AreEqual(1.1943059923483736f, arg(a), DELTA, L"Complex phase");
+			auto temp = arg(a);
 		}
 
 		TEST_METHOD(AbsoluteValue)
