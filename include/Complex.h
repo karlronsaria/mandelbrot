@@ -134,7 +134,7 @@ Complex<T>& Complex<T>::operator*=(const Complex<T>& other) {
 template <typename T>
 Complex<T>& Complex<T>::operator/=(const Complex<T>& other) {
 	auto Mod = abs(*this) / abs(other);
-	auto Arg = phase(*this) - phase(other);
+	auto Arg = arg(*this) - arg(other);
 
 	_pair = {
 		Mod * cos(Arg),

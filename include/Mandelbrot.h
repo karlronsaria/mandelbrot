@@ -70,7 +70,7 @@ namespace mnd
 			  return c + z * cos(sin(z));
 		  }
 		, NEW_COMPLEX_F(z, c, power) {
-			  return c + sin(z) / cos(z);
+			  return c + tan(z);
 		  }
 		, NEW_COMPLEX_F(z, c, power) {
 			  return c + 0.5L * (
@@ -123,7 +123,7 @@ namespace mnd
 
 	const color_code_f COLOR_SCHEMES[] = {
 		  [](flt_t v) { return HsvToColor(v + INIT_HUE, 1.f, 1.f); }
-		, [](flt_t v) { return HsvToColor(MAX_HUE / v + INIT_HUE, 1.f - 1.f / v, 1.f); }
+		, [](flt_t v) { return HsvToColor(MAX_HUE / v + INIT_HUE, 1.f, 1.f); }
 		, [](flt_t v) { return HsvToColor(10 * LOG(v) + INIT_HUE, 1.f, 1.f); }
 		, [](flt_t v) { return HsvToColor(100 * sin(v) + INIT_HUE, 1.f, 1.f); }
 	};

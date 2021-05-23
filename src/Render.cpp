@@ -127,7 +127,7 @@ void Renderer::Interruptible::InitializePlot(plot_t& plot, const view_t& view) {
 
 void Renderer::Interruptible::InitializeJulia(plot_t& plot, const view_t& view, const Geometry2D& scales) {
 	int_t x, y;
-
+	
 	for (y = view.top; Renderer::Threads::rendering && y < view.bottom; ++y)
 		for (x = view.left; Renderer::Threads::rendering && x < view.right; ++x)
 			plot[(view.right - view.left) * y + x] = { scales.coord_x(x), scales.coord_y(y) };
