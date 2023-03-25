@@ -382,7 +382,7 @@ bool Application::EnterNewMaximum(int_t& max) {
 					info.Delete();
 					inputOverlay.set(promptMsg + info.str + helpMsg);
 					break;
-				case sf::Keyboard::Key::Enter:
+				case sf::Keyboard::Key::Return:
 					maximumChanged = info.str.length() > 0;
 					acceptingInput = false;
 					break;

@@ -1,7 +1,7 @@
 #pragma once
-#ifdef DEBUG
-#include "C:/devlib/cpp/og/include/Debug.h"
-#endif
+// #ifdef DEBUG
+// #include "C:/devlib/cpp/og/include/Debug.h"
+// #endif
 #include "History.h"
 #include "Overlay.h"
 #include "Render.h"

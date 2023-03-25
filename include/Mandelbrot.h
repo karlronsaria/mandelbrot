@@ -1,7 +1,7 @@
 ﻿#pragma once
-#ifdef DEBUG
-#include "/devlib/cpp/og/include/Debug.h"
-#endif
+// #ifdef DEBUG
+// #include "/devlib/cpp/og/include/Debug.h"
+// #endif
 #include "Complex.h"
 #include "Geometry.h"
 #include <SFML/Graphics.hpp>
