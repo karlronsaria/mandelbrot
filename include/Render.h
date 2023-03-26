@@ -1,7 +1,4 @@
 #pragma once
-// #ifdef DEBUG
-// #include "/devlib/cpp/og/include/Debug.h"
-// #endif
 #include "Mandelbrot.h"
 #include "Overlay.h"
 #include "State.h"

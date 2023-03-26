@@ -1,5 +1,4 @@
 #pragma once
-// #include "\devlib\cpp\og\include\Debug.h"
 #include <list>
 #include <vcruntime.h>
 
@@ -28,9 +27,9 @@ public:
 	size_t size() const;
 	void foreach(const_binary_void function) const;
 
-// #ifdef DEBUG
-// 	std::string to_string(const char*) const;
-// #endif
+#ifdef DEBUG
+	std::string to_string(const char*) const;
+#endif
 };
 
 template <typename T>
@@ -106,14 +105,14 @@ void History<T>::foreach(const_binary_void function) const {
 		function(*this, temp);
 }
 
-// #ifdef DEBUG
-// template <typename T>
-// std::string History<T>::to_string(const char* delim) const {
-// 	std::ostringstream buf;
-// 
-// 	for (const auto& temp : _list)
-// 		buf << temp << delim;
-// 
-// 	return buf.str();
-// }
-// #endif
+#ifdef DEBUG
+template <typename T>
+std::string History<T>::to_string(const char* delim) const {
+	std::ostringstream buf;
+
+	for (const auto& temp : _list)
+		buf << temp << delim;
+
+	return buf.str();
+}
+#endif

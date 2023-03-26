@@ -1,4 +1,5 @@
 #pragma once
+#include "Debug.h"
 #include "types.h"
 #include <assert.h>
 #include <memory>
@@ -49,14 +50,14 @@ template <typename T>
 const Boundaries<T>& AssertNewBounds(T left, T right, T top, T bottom) {
 	bool noZeroLengths = left != right && top != bottom;
 
-// #ifdef DEBUG
-// 	if (!noZeroLengths) {
-// 		pass("Bounds left", left);
-// 		pass("Bounds right", right);
-// 		pass("Bounds top", top);
-// 		pass("Bounds bottom", bottom);
-// 	}
-// #endif
+#ifdef DEBUG
+	if (!noZeroLengths) {
+		debug::pass("Bounds left", left);
+		debug::pass("Bounds right", right);
+		debug::pass("Bounds top", top);
+		debug::pass("Bounds bottom", bottom);
+	}
+#endif
 
 	assert(noZeroLengths);
 	return Boundaries<T> { left, right, top, bottom };
