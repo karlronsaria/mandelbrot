@@ -74,7 +74,7 @@ pair_t pow(const pair_t& z, int_t a);
 pair_t pow(flt_t a, const pair_t& z);
 pair_t pow(const pair_t& z, const pair_t& w);
 pair_t fpow(const pair_t& z, flt_t w);
-flt_t sqr_sum(const pair_t& z);
+flt_t sq_sum(const pair_t& z);
 pair_t sqrt(const pair_t& z);
 
 template <typename T>

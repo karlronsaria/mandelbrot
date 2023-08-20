@@ -103,7 +103,7 @@ void mnd::ColorToHsv(const sf::Color& color, int_t& hue, flt_t& sat, flt_t& val)
 int_t mnd::EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f) {
 	z = f(z, c, power);
 
-	if (sqr_sum(z) > threshold * threshold)
+	if (sq_sum(z) > threshold * threshold)
 		return ESCAPE_BIAS * iteration;
 
 	return -1LL;
@@ -111,7 +111,7 @@ int_t mnd::EscapeTime(pair_t& z, const pair_t& c, int_t power, int_t iteration, 
 
 int_t mnd::Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f) {
 	z = f(z, c, power);
-	auto temp = sqr_sum(z);
+	auto temp = sq_sum(z);
 
 	if (temp > threshold * threshold)
 		return POTENTIAL_BIAS * pow(2.L, iteration % 52) / LOG(temp);
@@ -122,7 +122,7 @@ int_t mnd::Potential(pair_t& z, const pair_t& c, int_t power, int_t iteration, t
 int_t mnd::Dichromatic(pair_t& z, const pair_t& c, int_t power, int_t iteration, threshold_t threshold, complex_f f) {
 	z = f(z, c, power);
 
-	if (sqr_sum(z) > threshold * threshold)
+	if (sq_sum(z) > threshold * threshold)
 		return POTENTIAL_BIAS * (iteration % 2);
 
 	return -1LL;

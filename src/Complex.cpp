@@ -282,7 +282,7 @@ pair_t fpow(const pair_t& z, flt_t c) {
 	return TO_FLT(pow(abs(z), c)) * cis(c * arg(z));
 }
 
-flt_t sqr_sum(const pair_t& z) {
+flt_t sq_sum(const pair_t& z) {
 	return z.re() * z.re() + z.im() * z.im();
 }
 

@@ -25,7 +25,7 @@ namespace ComplexType
 
 		TEST_METHOD(SquareSum)
 		{
-			Assert::AreEqual(4.623851208678757f, sqrt(sqr_sum(a)), DELTA, L"Complex square sum");
+			Assert::AreEqual(4.623851208678757f, sqrt(sq_sum(a)), DELTA, L"Complex square sum");
 		}
 
 		TEST_METHOD(IntegralPower)
